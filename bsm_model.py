@@ -25,7 +25,9 @@ class BlackScholes:
         self._compute_d_values()
 
     def _compute_d_values(self):
-        """Compute d1 and d2 values used in pricing formulas."""
+        """
+        Compute d1 and d2 values used in pricing formulas.
+        """
         if self.T <= 0 or self.v <= 0:
             self.d1 = float('nan')
             self.d2 = float('nan')
@@ -36,7 +38,9 @@ class BlackScholes:
             self.d2 = self.d1 - vol_sqrt_T
 
     def calculate_prices(self):
-        """Calculate and return Black-Scholes call and put prices."""
+        """
+        Calculate and return Black-Scholes call and put prices.
+        """
         S, K, T, r, q = self.S, self.K, self.T, self.r, self.q
         d1, d2 = self.d1, self.d2
 
@@ -49,6 +53,23 @@ class BlackScholes:
         return call, put
 
     def vega(self):
-        """Compute Vega: sensitivity of option price to volatility."""
+        """
+        Compute Vega: sensitivity of option price to volatility.
+        """
         S, T, q, d1 = self.S, self.T, self.q, self.d1
         return S * exp(-q * T) * norm.pdf(d1) * sqrt(T)
+    
+    def implied_volatility(self, option_type: str,  market_price: float, iterations: int = 100, tolerance: float = 1e-5) -> tuple:
+        """
+        Calculate implied volatility using the Newton-Raphson method.
+        """
+        call, put = self.calculate_prices()
+        option = call if option_type.lower() == 'call' else put
+        diff = option - market_price
+
+        for _ in range(iterations):
+            if abs(diff) < tolerance:
+                return option_type, option.sigma
+            option.sigma -= (diff) / self.vega()
+
+        return option_type, option.sigma
