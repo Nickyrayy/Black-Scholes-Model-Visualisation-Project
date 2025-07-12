@@ -97,4 +97,31 @@ with st.sidebar:
     help="The time between hedging adjustment's (days)",
     )
 
-    st.divider()
+st.divider()
+
+bs_model = BlackScholes(T, K, S, v, r, q)
+call_price, put_price = bs_model.calculate_prices()
+vega = bs_model.vega()
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.metric("CALL Value", f"${call_price:.2f}")
+
+with col2:
+    st.metric("PUT Value", f"${put_price:.2f}")
+
+option_type = st.selectbox(
+"Select Option Type for Implied Volatility Calculation",
+["call", "put"],
+index=0,
+)
+
+option_type_market_price = st.number_input(
+    "Market Price of the Option $",
+    min_value=0.0,
+)
+
+option_type, implied_vol = bs_model.implied_volatility(option_type, option_type_market_price)
+
+st.write(f"Implied Volatility for {option_type} Option: {implied_vol:.2f}")

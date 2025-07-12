@@ -63,13 +63,22 @@ class BlackScholes:
         """
         Calculate implied volatility using the Newton-Raphson method.
         """
-        call, put = self.calculate_prices()
-        option = call if option_type.lower() == 'call' else put
-        diff = option - market_price
+        vol = self.v
 
         for _ in range(iterations):
-            if abs(diff) < tolerance:
-                return option_type, option.sigma
-            option.sigma -= (diff) / self.vega()
+            vega = self.vega()
+            if vega == 0:
+                break  # Prevent division by zero
 
-        return option_type, option.sigma
+            self.v = vol
+            self._compute_d_values()  # Recalculate d1 and d2 with the new volatility
+            call, put = self.calculate_prices()
+            option = call if option_type.lower() == 'call' else put
+            diff = option - market_price
+
+            
+            if abs(diff) < tolerance:
+                return option_type, vol
+            vol -= (diff) / vega
+
+        return float('nan'), float('nan')  # Return NaN if no convergence
