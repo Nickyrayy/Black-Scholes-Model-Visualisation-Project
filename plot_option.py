@@ -66,8 +66,8 @@ class PlotOption:
 
         #ax.zaxis.set_label_coords(-0.15, 0.5) # type: ignore
 
-        a = st.slider('Elevation', min_value=0, max_value=90, value=20, step=5)
-        b = st.slider('Rotation', min_value=0, max_value=360, value=330, step=5)
+        a = st.slider('Elevation', min_value=0, max_value=90, value=20, step=5, key=f"elevation_{option_type}")
+        b = st.slider('Rotation', min_value=0, max_value=360, value=330 if option_type == 'call' else 230, step=5, key=f"rotation_{option_type}")
         ax.view_init(elev=a, azim=b) # type: ignore
         fig.patch.set_facecolor("#262730")
         ax.set_facecolor('#262730') #262730
