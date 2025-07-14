@@ -129,6 +129,8 @@ with col1:
 with col2:
     st.metric("PUT Value", f"${put_price:.2f}")
 
+st.divider()
+
 option_type = st.selectbox(
 "Select Option Type for Implied Volatility Calculation",
 ["call", "put"],
