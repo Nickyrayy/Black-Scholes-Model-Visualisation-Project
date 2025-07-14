@@ -37,17 +37,23 @@ class PlotOption:
         call, put = model.calculate_prices()
         return call, put
 
-    def plot_option_surface(self):
+    def plot_option_surface(self, option_type: str):
 
         strikes = np.linspace(self.strike_min, self.strike_max, 30)
         maturities = np.linspace(self.maturity_min, self.maturity_max, 30)
         K_grid, T_grid = np.meshgrid(strikes, maturities)
 
-        call_surface, _ = np.vectorize(self.compute_option_price)(K_grid, T_grid)
+        if option_type == 'call':
+            call_surface, _ = np.vectorize(self.compute_option_price)(K_grid, T_grid)
+            option = call_surface
+
+        elif option_type == 'put':
+            _, put_surface = np.vectorize(self.compute_option_price)(K_grid, T_grid)
+            option = put_surface
 
         fig = plt.figure(figsize=(8, 8), facecolor="#FFFFFF", edgecolor="#FFFFFF")
         ax = fig.add_subplot(111, projection='3d')
-        ax.plot_surface(K_grid, T_grid, call_surface, cmap='viridis', color="#3D3D3D37") # type: ignore
+        ax.plot_surface(K_grid, T_grid, option, cmap='viridis', color="#3D3D3D37") # type: ignore
         ax.set_xlabel('Strike Price', labelpad=10, color="#FFFFFF")
         ax.set_ylabel('Time to Maturity', labelpad=10, color="#FFFFFF")
         ax.set_zlabel('Call Option Value', labelpad=5, color="#FFFFFF") # type: ignore

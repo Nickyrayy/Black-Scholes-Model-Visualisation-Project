@@ -3,6 +3,7 @@ import sys
 sys.path.append('views')
 
 from bsm_model import BlackScholes
+from plot_option import PlotOption
 
 st.set_page_config(
     page_title="Black-Scholes Model",
@@ -97,6 +98,13 @@ with st.sidebar:
     help="The time between hedging adjustment's (days)",
     )
 
+    st.divider()
+
+    strike_min = st.number_input('Min Strike Price', min_value=1.0, value=S*0.8, step=0.1)
+    strike_max = st.number_input('Max Strike Price', min_value=1.0, value=S*1.2, step=0.1)
+    maturity_min = st.slider('Min Time to Maturity', min_value=0.1, max_value=2.0, value=0.1, step=0.1)
+    maturity_max = st.slider('Max Time to Maturity', min_value=0.1, max_value=2.0, value=2.0, step=0.1)
+
 st.divider()
 
 bs_model = BlackScholes(T, K, S, v, r, q)
@@ -107,6 +115,16 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.metric("CALL Value", f"${call_price:.2f}")
+    st.divider()
+    st.subheader("Option Surface")
+    option_type = st.selectbox(
+        "Select Option Type for Implied Volatility Calculation",
+        ["call", "put"],
+        index=0,
+        key="option_type"
+        )
+    callPlot = PlotOption(strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
+    callPlot.plot_option_surface(option_type)
 
 with col2:
     st.metric("PUT Value", f"${put_price:.2f}")
