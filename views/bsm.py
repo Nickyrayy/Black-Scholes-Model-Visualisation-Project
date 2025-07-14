@@ -4,6 +4,7 @@ sys.path.append('views')
 
 from bsm_model import BlackScholes
 from plot_option import PlotOption
+from bsm_leland_model import BlackScholesLeland
 
 st.set_page_config(
     page_title="Black-Scholes Model",
@@ -108,8 +109,11 @@ with st.sidebar:
 st.divider()
 
 bs_model = BlackScholes(T, K, S, v, r, q)
+bsml_model = BlackScholesLeland(T,K,S,v,r,q,k,dt)
 call_price, put_price = bs_model.calculate_prices()
 vega = bs_model.vega()
+if dt > 0:
+    cash_call_price, cash_put_price, stock_call_price, stock_put_price = bsml_model.calculate_prices()
 
 col1, col2 = st.columns(2)
 
@@ -128,6 +132,22 @@ with col1:
 
 with col2:
     st.metric("PUT Value", f"${put_price:.2f}")
+
+st.divider()
+
+if dt > 0 and cash_call_price  > 0: # if one is > 0 then they all are :)
+
+    st.metric("Cash Call Value", f"${cash_call_price:.2f}")
+
+    st.metric("Stock Call Value", f"${stock_call_price:.2f}")
+
+    st.metric("Cash Put Value", f"${cash_put_price:.2f}")
+
+    st.metric("Stock Put Value", f"${stock_put_price:.2f}")
+
+else:
+
+    st.write("input a Δ Time")
 
 st.divider()
 
