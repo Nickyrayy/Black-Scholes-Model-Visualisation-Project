@@ -2,10 +2,13 @@ import streamlit as st
 import sys
 sys.path.append('views')
 
-from models.bsm_model import BlackScholes
-from graphPlots.plot_option_bsm import PlotOptionBSM
-from graphPlots.plot_option_bsml import PlotOptionBSML
-from models.bsm_leland_model import BlackScholesLeland
+from computations import (
+    get_bsm_prices,
+    generate_bsm_surface,
+    get_leland_prices,
+    generate_leland_surface,
+    get_implied_volatility
+)
 
 st.set_page_config(
     page_title="Black-Scholes Model",
@@ -19,7 +22,7 @@ st.header("Original Black-Scholes Model Options Pricing")
 st.markdown("""
 - [Jump to Original Black-Scholes Model](#original-black-scholes-model-options-pricing)
 - [Jump to Leland's Model](#leland-s-model-with-transaction-costs-and-dividend-yield)
-- [Jump to Implied Volatility](#implied-volatility-calculation)
+- [Jump to Implied Volatility And Pick Your Own Option Surface](#implied-volatility-calculation)
 """)
 
 # --- SIDEBAR INPUTS ---
@@ -47,41 +50,9 @@ with st.sidebar:
 
 st.divider()
 
-@st.cache_data
-def get_bsm_prices(T, K, S, v, r, q):
-    """Caches the Black-Scholes price calculation."""
-    bs_model = BlackScholes(T, K, S, v, r, q)
-    return bs_model.calculate_prices()
-
-@st.cache_data
-def generate_bsm_surface(option_type, elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q):
-    """Caches the BSM surface plot generation. Re-runs only when its specific arguments change."""
-    plotter = PlotOptionBSM(strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
-    fig = plotter.plot_option_surface(option_type, elevation, rotation)
-    return fig
-
-@st.cache_data
-def get_leland_prices(T, K, S, v, r, q, k, dt):
-    """Caches the Leland price calculation."""
-    bsml_model = BlackScholesLeland(T, K, S, v, r, q, k, dt)
-    return bsml_model.calculate_prices()
-
-@st.cache_data
-def generate_leland_surface(option_type, elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt):
-    """Caches the Leland surface plot generation."""
-    plotter = PlotOptionBSML(strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
-    fig = plotter.plot_option_surface(option_type, elevation, rotation)
-    return fig
-
-@st.cache_data
-def get_implied_volatility(T, K, S, v, r, q, option_type, market_price):
-    bs_model = BlackScholes(T, K, S, v, r, q)
-    return bs_model.implied_volatility(option_type, market_price)
-
+# --- STANDARD BLACK-SCHOLES PLOTS ---
 call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
 
-
-# --- STANDARD BLACK-SCHOLES PLOTS ---
 col1, col2 = st.columns(2)
 with col1:
     st.metric("CALL Value", f"${call_price:.2f}")
@@ -115,8 +86,7 @@ st.write("Leland's model incorporates transaction costs and dividend yield into 
 
 # Calculate Leland prices only if needed
 if dt > 0:
-    bsml_model = BlackScholesLeland(T, K, S, v, r, q, k, dt)
-    cash_call_price, cash_put_price, stock_call_price, stock_put_price = bsml_model.calculate_prices()
+    cash_call_price, cash_put_price, stock_call_price, stock_put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
 
     col1_1, col1_2, col2_1, col2_2 = st.columns(4)
 
@@ -169,8 +139,6 @@ else:
     st.info("Enter a Δ Time (in the sidebar) greater than zero to display Leland's Model results.")
 
 st.divider()
-
-
 
 # --- IMPLIED VOLATILITY ---
 
