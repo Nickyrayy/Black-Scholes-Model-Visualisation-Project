@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-# This model is assumed to be in the models/ folder
+
 from models.bsm_leland_model import BlackScholesLeland
 
 
@@ -62,16 +62,16 @@ class PlotOptionBSML:
         cash_call_p, cash_put_p, stock_call_p, stock_put_p = np.vectorize(self.compute_option_price)(K_grid, T_grid)
 
         # Select the correct data and set labels
-        if option_type == 'cash_call':
+        if option_type == 'Cash Call':
             option_data = cash_call_p
             z_label = 'Cash Call Price'
-        elif option_type == 'cash_put':
+        elif option_type == 'Cash Put':
             option_data = cash_put_p
             z_label = 'Cash Put Price'
-        elif option_type == 'stock_call':
+        elif option_type == 'Stock Call':
             option_data = stock_call_p
             z_label = 'Stock Call Price'
-        elif option_type == 'stock_put':
+        elif option_type == 'Stock Put':
             option_data = stock_put_p
             z_label = 'Stock Put Price'
         else:
@@ -92,10 +92,13 @@ class PlotOptionBSML:
         ax.set_ylabel('Time to Maturity', labelpad=10, color="#FFFFFF")
         ax.set_zlabel(z_label, labelpad=10, color="#FFFFFF")# type: ignore
         ax.tick_params(colors='#FFFFFF')
-        ax.xaxis._axinfo["grid"]['color'] = '#3D3D3D'# type: ignore
-        ax.yaxis._axinfo["grid"]['color'] = '#3D3D3D'# type: ignore
-        ax.zaxis._axinfo["grid"]['color'] = '#3D3D3D'# type: ignore
+        ax.xaxis._axinfo["grid"]['color'] = "#FFFFFF"# type: ignore
+        ax.yaxis._axinfo["grid"]['color'] = "#FFFFFF"# type: ignore
+        ax.zaxis._axinfo["grid"]['color'] = "#FFFFFF"# type: ignore
         ax.set_facecolor('#262730')
+        fig.patch.set_facecolor("#262730")
+        ax.set_box_aspect(None, zoom=0.85) # type: ignore
+
 
         # Return the figure object
         return fig

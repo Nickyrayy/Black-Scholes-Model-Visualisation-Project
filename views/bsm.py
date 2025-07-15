@@ -47,13 +47,39 @@ with st.sidebar:
 
 st.divider()
 
-# --- MODEL AND PLOTTER INSTANTIATION ---
-bs_model = BlackScholes(T, K, S, v, r, q)
-call_price, put_price = bs_model.calculate_prices()
+@st.cache_data
+def get_bsm_prices(T, K, S, v, r, q):
+    """Caches the Black-Scholes price calculation."""
+    bs_model = BlackScholes(T, K, S, v, r, q)
+    return bs_model.calculate_prices()
 
-# Instantiate the plotters with all required parameters
-regularOptionSurfacePlot = PlotOptionBSM(strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
-lelandOptionSurfacePlot = PlotOptionBSML(strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
+@st.cache_data
+def generate_bsm_surface(option_type, elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q):
+    """Caches the BSM surface plot generation. Re-runs only when its specific arguments change."""
+    plotter = PlotOptionBSM(strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
+    fig = plotter.plot_option_surface(option_type, elevation, rotation)
+    return fig
+
+@st.cache_data
+def get_leland_prices(T, K, S, v, r, q, k, dt):
+    """Caches the Leland price calculation."""
+    bsml_model = BlackScholesLeland(T, K, S, v, r, q, k, dt)
+    return bsml_model.calculate_prices()
+
+@st.cache_data
+def generate_leland_surface(option_type, elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt):
+    """Caches the Leland surface plot generation."""
+    plotter = PlotOptionBSML(strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
+    fig = plotter.plot_option_surface(option_type, elevation, rotation)
+    return fig
+
+@st.cache_data
+def get_implied_volatility(T, K, S, v, r, q, option_type, market_price):
+    bs_model = BlackScholes(T, K, S, v, r, q)
+    return bs_model.implied_volatility(option_type, market_price)
+
+call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+
 
 # --- STANDARD BLACK-SCHOLES PLOTS ---
 col1, col2 = st.columns(2)
@@ -62,16 +88,24 @@ with col1:
     st.divider()
     st.subheader("Call Option Surface")
     # Generate the figure and then plot it
-    call_fig = regularOptionSurfacePlot.plot_option_surface("call")
-    st.pyplot(call_fig)
+    plot_placeholder = st.empty()
+    st.divider()
+    elevation = st.slider('Elevation', 0, 90, 20, 5, key="e_call")
+    rotation = st.slider('Rotation', 0, 360, 330, 5, key="r_call")
+    fig = generate_bsm_surface("Call", elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
+    plot_placeholder.pyplot(fig)
 
 with col2:
     st.metric("PUT Value", f"${put_price:.2f}")
     st.divider()
     st.subheader("Put Option Surface")
     # Generate the figure and then plot it
-    put_fig = regularOptionSurfacePlot.plot_option_surface("put")
-    st.pyplot(put_fig)
+    plot_placeholder = st.empty()
+    st.divider()
+    elevation = st.slider('Elevation', 0, 90, 20, 5, key="e_put")
+    rotation = st.slider('Rotation', 0, 360, 230, 5, key="r_put")
+    fig = generate_bsm_surface("Put", elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
+    plot_placeholder.pyplot(fig)
 
 st.divider()
 
@@ -95,21 +129,10 @@ if dt > 0:
         plot_placeholder = st.empty()
         elevation = st.slider('Elevation', 0, 90, 20, 5, key="e_cash_call")
         rotation = st.slider('Rotation', 0, 360, 330, 5, key="r_cash_call")
-        fig = lelandOptionSurfacePlot.plot_option_surface("cash_call", elevation, rotation)
+        fig = generate_leland_surface("Cash Call", elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
         plot_placeholder.pyplot(fig)
 
     with col1_2:
-        st.metric("Cash PUT Value", f"${cash_put_price:.2f}")
-        st.divider()
-        st.subheader("Cash Put Option Surface")
-        
-        plot_placeholder = st.empty()
-        elevation = st.slider('Elevation', 0, 90, 20, 5, key="e_cash_put")
-        rotation = st.slider('Rotation', 0, 360, 230, 5, key="r_cash_put")
-        fig = lelandOptionSurfacePlot.plot_option_surface("cash_put", elevation, rotation)
-        plot_placeholder.pyplot(fig)
-
-    with col2_1:
         st.metric("Stock CALL Value", f"${stock_call_price:.2f}")
         st.divider()
         st.subheader("Stock Call Option Surface")
@@ -117,8 +140,20 @@ if dt > 0:
         plot_placeholder = st.empty()
         elevation = st.slider('Elevation', 0, 90, 20, 5, key="e_stock_call")
         rotation = st.slider('Rotation', 0, 360, 330, 5, key="r_stock_call")
-        fig = lelandOptionSurfacePlot.plot_option_surface("stock_call", elevation, rotation)
+        fig = generate_leland_surface("Stock Call", elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
         plot_placeholder.pyplot(fig)
+
+    with col2_1:
+        st.metric("Cash PUT Value", f"${cash_put_price:.2f}")
+        st.divider()
+        st.subheader("Cash Put Option Surface")
+        
+        plot_placeholder = st.empty()
+        elevation = st.slider('Elevation', 0, 90, 20, 5, key="e_cash_put")
+        rotation = st.slider('Rotation', 0, 360, 230, 5, key="r_cash_put")
+        fig = generate_leland_surface("Cash Put", elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
+        plot_placeholder.pyplot(fig)
+
 
     with col2_2:
         st.metric("Stock PUT Value", f"${stock_put_price:.2f}")
@@ -128,35 +163,74 @@ if dt > 0:
         plot_placeholder = st.empty()
         elevation = st.slider('Elevation', 0, 90, 20, 5, key="e_stock_put")
         rotation = st.slider('Rotation', 0, 360, 230, 5, key="r_stock_put")
-        fig = lelandOptionSurfacePlot.plot_option_surface("stock_put", elevation, rotation)
+        fig = generate_leland_surface("Stock Put", elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
         plot_placeholder.pyplot(fig)
 else:
     st.info("Enter a Δ Time (in the sidebar) greater than zero to display Leland's Model results.")
 
 st.divider()
 
-# --- IMPLIED VOLATILITY ---
-st.header("Implied Volatility Calculation")
-st.write("Calculate the implied volatility of an option given its market price.")
 
-iv_option_type = st.selectbox(
+
+# --- IMPLIED VOLATILITY ---
+
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    st.header("Implied Volatility Calculation")
+    st.write("Calculate the implied volatility of an option given its market price.")
+
+    option_type = st.selectbox(
     "Select Option Type for Implied Volatility Calculation",
     ["call", "put"],
     index=0,
-    key="iv_type"
-)
+    )
 
-market_price = st.number_input(
-    "Market Price of the Option $",
-    min_value=0.01,
-    value=call_price, # Default to the calculated BSM price
-    step=0.1
-)
+    option_type_market_price = st.number_input(
+        "Market Price of the Option $",
+        min_value=0.0,
+        value=call_price
+    )
 
-if st.button("Calculate Implied Volatility"):
-    try:
-        implied_vol = bs_model.implied_volatility(iv_option_type, market_price)
-        st.success(f"Implied Volatility for {iv_option_type.capitalize()} Option: {implied_vol:.2%}")
-    except ValueError as e:
-        st.error(f"Could not calculate Implied Volatility: {e}")
+    option_type, implied_vol = get_implied_volatility(T, K, S, v, r, q, option_type, option_type_market_price)
+
+    st.info(f"Implied Volatility for {option_type} Option: {implied_vol:.2f}")
+
+    st.divider()
+    st.header("Option Surface Parameters")
+    st.write("Visualize the option surface for different parameters.")
+
+    elevation = st.slider('Elevation', 0, 90, 20, 5, key="n_surface_bsm")
+    rotation = st.slider('Rotation', 0, 360, 330, 5, key="u_surface_bsm")
+
+with col2:
+    st.header("Pick your Option Surface")
+    bsm_model = st.selectbox(
+        "Select Model for Option Surface",
+        ["Black-Scholes", "Leland's Model"], 
+        index=0)
+
+
+    if bsm_model == "Black-Scholes":
+        option_surface_type = st.selectbox(
+        "Select Option Surface Type",
+        ["Call", "Put"],
+        index=0,
+        )
+        
+        plot_placeholder = st.empty()
+        
+        fig = generate_bsm_surface(option_surface_type, elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
+        plot_placeholder.pyplot(fig)
+
+    if bsm_model == "Leland's Model":
+        option_surface_type = st.selectbox(
+        "Select Option Surface Type",
+        ["Cash Call", "Stock Call", "Cash Put", "Stock Put"],
+        index=0,
+        )
+        plot_placeholder = st.empty()
+        
+        fig = generate_leland_surface(option_surface_type, elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
+        plot_placeholder.pyplot(fig)
 
