@@ -1,4 +1,3 @@
-import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -10,7 +9,6 @@ from models.bsm_leland_model import BlackScholesLeland
 class PlotOptionBSML:
     """
     Handles plotting for the Black-Scholes-Leland model.
-    This version is designed for interactive control via Streamlit widgets.
     """
     def __init__(
         self,

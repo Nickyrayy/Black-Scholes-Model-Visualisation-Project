@@ -1,4 +1,3 @@
-import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -9,7 +8,6 @@ from models.bsm_model import BlackScholes
 class PlotOptionBSM:
     """
     Handles plotting for the standard Black-Scholes model.
-    This version is designed to be non-interactive.
     """
     def __init__(
         self,

@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 # Page Setup
 
 about_page = st.Page(
@@ -21,5 +22,7 @@ pg = st.navigation(
         "Models":[bsm_page],
     }
 )
+
+st.logo("assets/black-scholes-model-high-resolution-logo.png")
 
 pg.run()
