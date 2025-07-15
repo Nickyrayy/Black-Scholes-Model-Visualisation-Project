@@ -2,14 +2,16 @@ import streamlit as st
 import sys
 sys.path.append('views')
 
-from computations import (
+from functions.computations import (
     get_bsm_prices,
-    generate_bsm_surface,
     get_leland_prices,
-    generate_leland_surface,
     get_implied_volatility
 )
-from helper import display_option_surface
+
+from functions.helper import (
+    generate_bsm_option_surface,
+    generate_leland_option_surface
+)
 
 st.set_page_config(
     page_title="Black-Scholes Model",
@@ -50,10 +52,10 @@ with st.sidebar:
     maturity_max = st.slider('Max Time to Maturity', min_value=0.1, max_value=2.0, value=2.0, step=0.1, key="maturity_max")
 
 
-
+# --- TABS ---
 tab1, tab2, tab3, tab4 = st.tabs(["Black-Scholes Model", "Leland's Model", "Option Surface Picker", "Implied Volatility"])
 
-# --- STANDARD BLACK-SCHOLES PLOTS ---
+# --- TAB 1: STANDARD BLACK-SCHOLES PLOTS ---
 with tab1:
     st.header("Black-Scholes Model Pricing")
     call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
@@ -61,15 +63,13 @@ with tab1:
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Call Option Value", f"${call_price:.2f}")
-        bsm_call_args = ("Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
-        display_option_surface("Call Option Surface", generate_bsm_surface, bsm_call_args, "call", default_rotation=330)
-
+        generate_bsm_option_surface("Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
     with col2:
         st.metric("Put Option Value", f"${put_price:.2f}")
-        bsm_put_args = ("Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
-        display_option_surface("Put Option Surface", generate_bsm_surface, bsm_put_args, "put", default_rotation=230)
+        generate_bsm_option_surface("Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
 
-# --- LELAND'S MODEL PLOTS ---
+
+# --- TAB 2: LELAND'S MODEL PLOTS ---
 with tab2:
     st.header("Leland's Model with Transaction Costs and Dividend Yield")
 
@@ -79,31 +79,25 @@ with tab2:
         col1, col2 = st.columns(2)
         with col1:
             st.subheader("Call Options")
-
             st.metric("Cash-Adjusted Call Value", f"${cash_call_price:.2f}")
-            leland_cash_call_args = ("Cash Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
-            display_option_surface("Cash Call Surface", generate_leland_surface, leland_cash_call_args, "leland_cash_call", default_rotation=330)
+            generate_leland_option_surface("Cash Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
 
             st.metric("Stock-Adjusted Call Value", f"${stock_call_price:.2f}")
-            leland_stock_call_args = ("Stock Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
-            display_option_surface("Stock Call Surface", generate_leland_surface, leland_stock_call_args, "leland_stock_call", default_rotation=330)
+            generate_leland_option_surface("Stock Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
 
         with col2:
             st.subheader("Put Options")
-
             st.metric("Cash-Adjusted Put Value", f"${cash_put_price:.2f}")
-            leland_cash_put_args = ("Cash Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
-            display_option_surface("Cash Put Surface", generate_leland_surface, leland_cash_put_args, "leland_cash_put", default_rotation=230)
+            generate_leland_option_surface("Cash Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
 
             st.metric("Stock-Adjusted Put Value", f"${stock_put_price:.2f}")
-            leland_stock_put_args = ("Stock Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
-            display_option_surface("Stock Put Surface", generate_leland_surface, leland_stock_put_args, "leland_stock_put", default_rotation=230)
+            generate_leland_option_surface("Stock Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
     else:
         st.info("Enter a Δ Time (in the sidebar) greater than zero to display Leland's Model results.")
 
-# --- OPTION SURFACE PICKER ---
+# --- TAB 3: OPTION SURFACE PICKER ---
 with tab3:
-    col1, col2, col3 = st.columns([1, 2, 1])
+    col1, col2 = st.columns([1, 2])
 
     with col1:
         st.header("Pick your Option Surface")
@@ -119,8 +113,7 @@ with tab3:
             ["Call", "Put"],
             index=0,
             )
-
-        elif bsm_model == "Leland's Model":
+        else: # Leland's Model
             option_surface_type = st.selectbox(
             "Select Option Surface Type",
             ["Cash Call", "Stock Call", "Cash Put", "Stock Put"],
@@ -128,38 +121,30 @@ with tab3:
             )
 
         st.write("Adjust Plot View")
-
         default_rotation = 330 if "Call" in option_surface_type else 230
         elevation_val = st.slider('Elevation', 0, 90, 20, 5, key="e_picker")
         rotation_val = st.slider('Rotation', 0, 360, value=default_rotation, step=5, key="r_picker")
-        
 
     with col2:
-    
-        if option_surface_type == "Put":
-            bsm_put_args = ("Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
-            display_option_surface("Put Option Surface", generate_bsm_surface, bsm_put_args, "put2", default_rotation=0, elevation=elevation_val, rotation=rotation_val)
-        elif option_surface_type == "Call":
-            bsm_call_args = ("Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
-            display_option_surface("Call Option Surface", generate_bsm_surface, bsm_call_args, "call2", default_rotation=0, elevation=elevation_val, rotation=rotation_val)
+        st.header(f"Interactive: {option_surface_type} Surface")
+        
+        # Call the appropriate helper based on the selected model
+        if bsm_model == "Black-Scholes":
+            generate_bsm_option_surface(
+                option_surface_type, 
+                strike_min, strike_max, maturity_min, maturity_max, 
+                S, v, r, q, 
+                elevation=elevation_val, rotation=rotation_val
+            )
+        elif bsm_model == "Leland's Model":
+            generate_leland_option_surface(
+                option_surface_type, 
+                strike_min, strike_max, maturity_min, maturity_max, 
+                S, v, r, q, k, dt, 
+                elevation=elevation_val, rotation=rotation_val
+            )
 
-        elif option_surface_type == "Cash Call":
-            leland_cash_call_args = ("Cash Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
-            display_option_surface("Cash Call Surface", generate_leland_surface, leland_cash_call_args, "leland_cash_call", default_rotation=0, elevation=elevation_val, rotation=rotation_val)
-
-        elif option_surface_type == "Stock Call":
-            leland_stock_call_args = ("Stock Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
-            display_option_surface("Stock Call Surface", generate_leland_surface, leland_stock_call_args, "leland_stock_call", default_rotation=0, elevation=elevation_val, rotation=rotation_val)
-
-        elif option_surface_type == "Cash Put":
-            leland_cash_put_args = ("Cash Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
-            display_option_surface("Cash Put Surface", generate_leland_surface, leland_cash_put_args, "leland_cash_put", default_rotation=0, elevation=elevation_val, rotation=rotation_val)
-
-        elif option_surface_type == "Stock Put":
-            leland_stock_put_args = ("Stock Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
-            display_option_surface("Stock Put Surface", generate_leland_surface, leland_stock_put_args, "leland_stock_put", default_rotation=0, elevation=elevation_val, rotation=rotation_val)
-    
-# --- IMPLIED VOLATILITY CALCULATION ---
+# --- TAB 4: IMPLIED VOLATILITY CALCULATION ---
 with tab4:
     col1, col2 = st.columns([1, 2])
 
@@ -172,13 +157,20 @@ with tab4:
             ["call", "put"],
             index=0,
             )
+        
+        # Set default market price based on selected option
+        call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+        default_market_price = call_price if option_type == 'call' else put_price
 
         option_type_market_price = st.number_input(
                 "Market Price of the Option $",
                 min_value=0.0,
-                value=call_price
+                value=default_market_price,
+                format="%.2f"
             )
 
         option_type, implied_vol = get_implied_volatility(T, K, S, v, r, q, option_type, option_type_market_price)
 
-        st.info(f"Implied Volatility for {option_type} Option: {implied_vol:.2f}")
+        st.metric(f"Implied Volatility for {option_type.capitalize()} Option", f"{implied_vol:.2%}")
+
+
