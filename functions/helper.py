@@ -1,5 +1,5 @@
 import streamlit as st
-from functions.computations import generate_bsm_surface, generate_leland_surface
+from functions.graph_surface_helper import generate_bsm_surface, generate_leland_surface, generate_bsm_vs_leland_surface
 import base64
 import os
 
@@ -69,6 +69,32 @@ def generate_leland_option_surface(option_type, strike_min, strike_max, maturity
         surface_func=generate_leland_surface,
         base_args=leland_args,
         key_suffix=f"leland_{option_type.replace(' ', '_').lower()}",
+        default_rotation=default_rotation,
+        elevation=elevation,
+        rotation=rotation
+    )
+
+def generate_bsm_vs_leland_option_surface(option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt, elevation=None, rotation=None):
+    """
+    Generates and displays a comparison surface between Black-Scholes and Leland's model.
+    This function is specific to the BSM vs BSML comparison.
+    """
+    # Leland's model requires time delta (dt) to be greater than zero.
+    if not dt > 0:
+        st.warning(f"To plot the {option_type} surface, please set a Δ Time greater than zero in the sidebar.")
+        return
+
+    # Prepare arguments for the Leland computation function
+    leland_args = (option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
+    
+    # Set a default viewing angle based on the option type
+    default_rotation = 330 if "Call" in option_type else 230
+
+    display_option_surface(
+        title=f"Bsm vs Leland {option_type} Surface",
+        surface_func=generate_bsm_vs_leland_surface,
+        base_args=leland_args,
+        key_suffix=f"bsmVsleland_{option_type.replace(' ', '_').lower()}",
         default_rotation=default_rotation,
         elevation=elevation,
         rotation=rotation

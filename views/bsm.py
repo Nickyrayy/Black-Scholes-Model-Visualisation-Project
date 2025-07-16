@@ -1,7 +1,7 @@
 import streamlit as st
 import sys
 
-from models.bsm_leland_model import BlackScholesLeland
+#from models.bsm_leland_model import BlackScholesLeland
 sys.path.append('views')
 
 from functions.computations import (
@@ -12,7 +12,8 @@ from functions.computations import (
 
 from functions.helper import (
     generate_bsm_option_surface,
-    generate_leland_option_surface
+    generate_leland_option_surface,
+    generate_bsm_vs_leland_option_surface
 )
 
 st.set_page_config(
@@ -57,7 +58,7 @@ with st.sidebar:
 
 
 # --- TABS ---
-tab1, tab2, tab3, tab4 = st.tabs(["Black-Scholes Model", "Leland's Model", "Option Surface Picker", "Implied Volatility"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Black-Scholes Model", "Leland's Model","BSM Vs BSML", "Option Surface Picker", "Implied Volatility"])
 
 # --- TAB 1: STANDARD BLACK-SCHOLES PLOTS ---
 with tab1:
@@ -92,8 +93,32 @@ with tab2:
     else:
         st.info("Enter a Δ Time (in the sidebar) greater than zero to display Leland's Model results.")
 
-# --- TAB 3: OPTION SURFACE PICKER ---
+# --- Tab 3: BSM vs Leland's Model Option Surface ---
 with tab3:
+    st.header("Black-Scholes vs Leland's Model Option Surface")
+
+    if dt > 0:
+        
+        Le_call_price, Le_put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
+        bs_Call_price, bs_Put_price = get_bsm_prices(T, K, S, v, r, q)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Black-Scholes Call Value", f"${bs_Call_price:.2f}")
+            st.metric("Leland's Call Value", f"${Le_call_price:.2f}")
+            generate_bsm_vs_leland_option_surface("Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
+
+        with col2:
+            st.metric("Black-Scholes Put Value", f"${bs_Put_price:.2f}")
+            st.metric("Leland's Put Value", f"${Le_put_price:.2f}")
+            generate_bsm_vs_leland_option_surface("Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
+
+    else:
+        st.info("Enter a Δ Time (in the sidebar) greater than zero to display Leland's Model results.")
+
+
+# --- TAB 4: OPTION SURFACE PICKER ---
+with tab4:
     col1, col2, col3 = st.columns([1, 1.5, 0.5])
 
     with col1:
@@ -142,8 +167,8 @@ with tab3:
                 elevation=elevation_val, rotation=rotation_val
             )
 
-# --- TAB 4: IMPLIED VOLATILITY CALCULATION ---
-with tab4:
+# --- TAB 5: IMPLIED VOLATILITY CALCULATION ---
+with tab5:
     col1, col2 = st.columns([1, 2])
 
     with col1:
