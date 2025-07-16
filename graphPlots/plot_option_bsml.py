@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-
 from models.bsm_leland_model import BlackScholesLeland
 
 
@@ -45,7 +44,7 @@ class PlotOptionBSML:
         Generates the 3D surface plot for a given option type and view angle.
 
         Args:
-            option_type (str): One of 'cash_call', 'cash_put', 'stock_call', 'stock_put'.
+            option_type (str): One of 'Call', 'Put'.
             elevation (int): The elevation angle for the 3D plot.
             rotation (int): The rotation (azimuth) angle for the 3D plot.
 

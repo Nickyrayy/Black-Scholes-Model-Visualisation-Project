@@ -5,8 +5,6 @@ from scipy.stats import norm
 class BlackScholes:
     def __init__(self, T: float, K: float, S: float, v: float, r: float, q: float):
         """
-        Initialize Black-Scholes model parameters.
-
         Parameters:
         - T: Time to maturity (in years)
         - K: Strike price
@@ -28,7 +26,7 @@ class BlackScholes:
         """
         Compute d1 and d2 values used in pricing formulas.
         """
-        if self.T <= 0 or self.v <= 0:
+        if self.v <= 0:
             self.d1 = float('nan')
             self.d2 = float('nan')
         else:

@@ -1,8 +1,8 @@
 import streamlit as st
 from PIL import Image
 from functions.helper import get_image_as_base64
+
 # --- Page Configuration ---
-# Use st.set_page_config to set the page title, icon, and layout.
 st.set_page_config(
     page_title="About Nicholas Richter",
     page_icon="�",
@@ -10,11 +10,8 @@ st.set_page_config(
 )
 
 # --- Profile Section ---
-# Using columns to place an image next to the introduction.
 col1, col2 = st.columns([0.3, 0.7], gap="large")
 with col1:
-    # It's a good practice to use a professional-looking, square image.
-    # Make sure to replace 'assets/profile_pic.png' with the actual path to your image.
     try:
         profile_pic = Image.open('assets/profile_pic.png')
         st.image(profile_pic, width=230)
@@ -30,8 +27,6 @@ with col2:
         I am a driven and analytical student pursuing a double degree in Computer Science and Mathematics, with a major in Data Science. My work focuses on the intersection of complex financial models, high-performance computing, and intuitive software design. This portfolio showcases my ability to transform theoretical concepts into practical, hands-on applications.
         """
     )
-    # Adding links to your professional profiles.
-    # Create columns for the social links
     social_col1, social_col2, social_col_rest = st.columns([1, 1, 20])
 
     # Get base64 encoded strings for logos
@@ -67,7 +62,6 @@ st.markdown(
     """
 )
 
-# Using columns to detail the project's features, directly referencing the app's functionality.
 col1, col2 = st.columns(2, gap="large")
 
 with col1:

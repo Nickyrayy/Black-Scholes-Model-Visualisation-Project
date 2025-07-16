@@ -116,7 +116,6 @@ with tab3:
     else:
         st.info("Enter a Δ Time (in the sidebar) greater than zero to display Leland's Model results.")
 
-
 # --- TAB 4: OPTION SURFACE PICKER ---
 with tab4:
     col1, col2, col3 = st.columns([1, 1.5, 0.5])
