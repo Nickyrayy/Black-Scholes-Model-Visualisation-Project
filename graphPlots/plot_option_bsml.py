@@ -37,8 +37,8 @@ class PlotOptionBSML:
     def compute_option_price(self, K_val, T_val):
         """Helper function to calculate Leland prices."""
         model = BlackScholesLeland(T_val, K_val, self.S, self.v, self.r, self.q, self.k, self.dt)
-        cash_call, cash_put, stock_call, stock_put = model.calculate_prices()
-        return cash_call, cash_put, stock_call, stock_put
+        l_call_price, l_put_price = model.calculate_prices()
+        return l_call_price, l_put_price
 
     def plot_option_surface(self, option_type: str, elevation: int, rotation: int):
         """
@@ -57,21 +57,15 @@ class PlotOptionBSML:
         K_grid, T_grid = np.meshgrid(strikes, maturities)
 
         # Vectorize the calculation over the grid
-        cash_call_p, cash_put_p, stock_call_p, stock_put_p = np.vectorize(self.compute_option_price)(K_grid, T_grid)
+        l_call_p, l_put_p = np.vectorize(self.compute_option_price)(K_grid, T_grid)
 
         # Select the correct data and set labels
-        if option_type == 'Cash Call':
-            option_data = cash_call_p
-            z_label = 'Cash Call Price'
-        elif option_type == 'Cash Put':
-            option_data = cash_put_p
-            z_label = 'Cash Put Price'
-        elif option_type == 'Stock Call':
-            option_data = stock_call_p
-            z_label = 'Stock Call Price'
-        elif option_type == 'Stock Put':
-            option_data = stock_put_p
-            z_label = 'Stock Put Price'
+        if option_type == 'Call':
+            option_data = l_call_p
+            z_label = 'Call Price'
+        elif option_type == 'Put':
+            option_data = l_put_p
+            z_label = 'Put Price'
         else:
             raise ValueError(f"Unknown option_type for Leland plot: {option_type}")
 

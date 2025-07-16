@@ -16,9 +16,15 @@ bsm_page = st.Page(
     icon=":material/functions:",
 )
 
+bsm_info = st.Page(
+    page="./views/bsm_info.py",
+    title="Black-Scholes Model Information",
+    icon=":material/functions:"
+)
+
 pg = st.navigation(
     {
-        "info":[about_page],
+        "info":[about_page,bsm_info],
         "Models":[bsm_page],
     }
 )

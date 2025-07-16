@@ -1,27 +1,31 @@
 import streamlit as st
 from functions.computations import generate_bsm_surface, generate_leland_surface
+import base64
+import os
+
 
 def display_option_surface(title, surface_func, base_args, key_suffix, default_rotation, elevation=None, rotation=None):
     """
     A reusable function to display an option surface plot and its controls.
     This function is a general-purpose plotter.
     """
-    st.subheader(title)
-    plot_placeholder = st.empty()
+    with st.container(border=True):
+        st.subheader(title)
+        plot_placeholder = st.empty()
 
-    # If elevation and rotation are not passed directly, create sliders for them.
-    if elevation is None and rotation is None:
-        with st.expander("Adjust Plot View"):
-            elevation = st.slider('Elevation', 0, 90, 20, 5, key=f"e_{key_suffix}")
-            rotation = st.slider('Rotation', 0, 360, value=default_rotation, step=5, key=f"r_{key_suffix}")
+        # If elevation and rotation are not passed directly, create sliders for them.
+        if elevation is None and rotation is None:
+            with st.expander("Adjust Plot View"):
+                elevation = st.slider('Elevation', 0, 90, 20, 5, key=f"e_{key_suffix}")
+                rotation = st.slider('Rotation', 0, 360, value=default_rotation, step=5, key=f"r_{key_suffix}")
 
-    # Construct the full list of arguments for the plotting function
-    # The order is based on the computation function signature: (type, elevation, rotation, ...)
-    all_args = (base_args[0], elevation, rotation) + base_args[1:]
-    
-    # Generate the plot figure
-    fig = surface_func(*all_args)
-    plot_placeholder.pyplot(fig)
+        # Construct the full list of arguments for the plotting function
+        # The order is based on the computation function signature: (type, elevation, rotation, ...)
+        all_args = (base_args[0], elevation, rotation) + base_args[1:]
+        
+        # Generate the plot figure
+        fig = surface_func(*all_args)
+        plot_placeholder.pyplot(fig)
 
 def generate_bsm_option_surface(option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, elevation=None, rotation=None):
     """
@@ -69,3 +73,10 @@ def generate_leland_option_surface(option_type, strike_min, strike_max, maturity
         elevation=elevation,
         rotation=rotation
     )
+
+def get_image_as_base64(path):
+    """Encodes a local image file into a base64 string for embedding in HTML."""
+    if not os.path.exists(path):
+        return None
+    with open(path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode()

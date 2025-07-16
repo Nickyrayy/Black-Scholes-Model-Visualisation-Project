@@ -1,5 +1,5 @@
-from numpy import log, sqrt, exp, pi
-from scipy.stats import norm
+from numpy import sqrt, pi
+from models.bsm_model import BlackScholes 
 
 
 class BlackScholesLeland:
@@ -21,7 +21,10 @@ class BlackScholesLeland:
         self.r = r / 100
         self.q = q / 100
         self.k = k / 100
-        self.dt = dt
+        self.dt = dt / 252
+
+        self.call_price = None
+        self.put_price = None
 
     def calculate_prices(
         self,
@@ -34,45 +37,11 @@ class BlackScholesLeland:
         q = self.q # Dividend yield
         k = self.k # Roundtrip transaction cost rate per unit dollar of transaction
         dt = self.dt # Delta t, the time between hedging adjustment
-        
-        V = (
-            (v * (1 + k * sqrt(2/pi))) /
-            (sqrt(v * sqrt(dt)))
-            )
-                              # Leland variation should be caclulated in trading days
-                            # T represents the workings day from purchase to the *day before* expiry
-        d1 = (
-        (log(S / K) + T * (r - q + 0.5 * V ** 2)) / 
-        (V * sqrt(T))
-        )
-        
-        d2 = d1 - V * sqrt(T)
 
-        cash_call_price = (
-        (1 + (k/2)) * S * exp(-q * T) * norm.cdf(d1) - 
-        K * exp(-(r * T)) * norm.cdf(d2)
-        )
+        leland_number = sqrt(2 / pi) * (k / (v * sqrt(dt)))
+        new_v = sqrt(v**2 * (1 + leland_number))
 
-        cash_put_price = (
-        K * exp(-(r * T)) * norm.cdf(-d2) - 
-        (1-(k/2)) * S * exp(-q * T) * norm.cdf(-d1) + 
-        (k/2) * S * exp(-(q) * T)
-        )
+        bs_model = BlackScholes(T, K, S, new_v * 100, r * 100, q * 100) # convert back to percentages
+        call_price, put_price = bs_model.calculate_prices()
 
-        stock_call_price = (
-        (k/2) * S * exp(-q * T) +
-        (1-(k/2)) * S * exp(-q * T) * norm.cdf(d1) - 
-        K * exp(-(r * T)) * norm.cdf(d2)
-        )
-
-        stock_put_price = (
-        K * exp(-(r * T)) * norm.cdf(-d2) - 
-        (1-(k/2)) * S * exp(-q * T) * norm.cdf(-d1)
-        )
-
-        self.cash_call_price = cash_call_price
-        self.cash_put_price = cash_put_price
-        self.stock_call_price = stock_call_price
-        self.stock_put_price = stock_put_price
-
-        return cash_call_price, cash_put_price, stock_call_price, stock_put_price
+        return call_price, put_price
