@@ -78,11 +78,11 @@ with st.container(border=True):
     
     st.markdown("#### The Leland Number (Le)")
     st.markdown("The impact of transaction costs is quantified by the **Leland Number**, which modifies the volatility based on the cost per transaction and the hedging frequency.")
-    st.latex(r'''Le = \sqrt{\frac{2}{\pi}} \cdot \frac{k}{\sigma \sqrt{\delta t}}''')
+    st.latex(r'''Le = \sqrt{\frac{2}{\pi}} \cdot \frac{k}{\sigma \sqrt{\Delta t}}''')
     st.markdown("""
     - **$k$**: Round-trip transaction cost (as a percentage of the asset's value).
     - **$\\sigma$**: The original, unadjusted volatility of the underlying.
-    - **$\\delta t$**: The time interval between portfolio re-hedges (in years). A smaller $\\delta t$ implies more frequent hedging.
+    - **$\\Delta t$**: The time interval between portfolio re-hedges (in years). A smaller $\\Delta t$ implies more frequent hedging.
     """)
 
 #--- Adjusted Volatility Calculation ---
@@ -181,13 +181,13 @@ with col2:
             st.markdown("#### Step 1: Calculate the Adjusted Volatility ($\\sigma_{adj}$)")
             st.markdown("The core of the adjustment is the **Leland Number (Le)**, which quantifies the impact of transaction costs.")
             st.latex(r'''
-            Le = \sqrt{\frac{2}{\pi}} \times \frac{k}{\sigma \sqrt{\delta t}}
+            Le = \sqrt{\frac{2}{\pi}} \times \frac{k}{\sigma \sqrt{\Delta t}}
             ''')
             st.markdown(
                 """
                 - **$k$**: Round-trip transaction cost as a percentage of the asset price.
                 - **$\\sigma$**: Original volatility of the underlying asset.
-                - **$\\delta t$**: The time interval between portfolio re-hedges (e.g., daily would be 1/252).
+                - **$\\Delta t$**: The time interval between portfolio re-hedges (e.g., daily would be 1/252).
                 """
             )
 
@@ -207,7 +207,7 @@ with col2:
         with st.expander("View Practical Implications and Limitations"):
             st.markdown("##### Hedging Strategies")
             st.markdown("""
-            - **Discrete Rebalancing:** The model explicitly acknowledges that hedging is not continuous. The choice of the rebalancing interval, $\\delta t$, is a critical decision. A shorter interval leads to a better hedge but incurs higher transaction costs, which is reflected in a higher adjusted volatility and a more expensive option price.
+            - **Discrete Rebalancing:** The model explicitly acknowledges that hedging is not continuous. The choice of the rebalancing interval, $\\Delta t$, is a critical decision. A shorter interval leads to a better hedge but incurs higher transaction costs, which is reflected in a higher adjusted volatility and a more expensive option price.
             - **Wider Hedging Bands:** The increased volatility effectively creates a "band" around the theoretical BSM delta. A trader using this model would only rebalance their position when the portfolio's delta moves outside of this implicit band, reducing trading frequency and costs.
             """)
 
@@ -215,7 +215,7 @@ with col2:
             st.markdown("""
             - **Approximation:** The Leland model is an approximation. It may underestimate the true cost of re-hedging after a large, sudden price jump.
             - **Ex-ante Cost Estimation:** The model calculates the *expected* transaction cost at the start. The *actual* costs incurred will depend on the path the asset price takes over the life of the option.
-            - **No Unique Price:** Because the adjusted volatility depends on the chosen rebalancing frequency ($\\delta t$), there is no single "correct" price, but rather a price that is consistent with a specific hedging strategy.
+            - **No Unique Price:** Because the adjusted volatility depends on the chosen rebalancing frequency ($\\Delta t$), there is no single "correct" price, but rather a price that is consistent with a specific hedging strategy.
             """)
 
     st.info("In conclusion, the Leland model provides a practical method for incorporating transaction costs into option pricing. By adjusting volatility, it offers a more conservative and realistic valuation, acknowledging that maintaining a hedge is not a cost-free exercise.")

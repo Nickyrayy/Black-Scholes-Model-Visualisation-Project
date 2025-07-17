@@ -50,12 +50,22 @@ class BlackScholes:
 
         return call, put
 
-    def vega(self):
+    def vega(self, option_type, market_price):
         """
         Compute Vega: sensitivity of option price to volatility.
         """
         S, T, q, d1 = self.S, self.T, self.q, self.d1
-        return S * exp(-q * T) * norm.pdf(d1) * sqrt(T)
+        Vega = S * exp(-q * T) * norm.pdf(d1) * sqrt(T)
+        Vega /= 100 # Vega is often expressed per 1% change in volatility
+        return option_type, Vega
+    
+    def gamma(self, option_type, market_price):
+        """
+        Compute Gamma: sensitivity of Vega to volatility.
+        """
+        S, T, q, d1 = self.S, self.T, self.q, self.d1
+        Gamma = norm.pdf(d1) * exp(-q * T) / (S * self.v * sqrt(T))
+        return option_type, Gamma
     
     def implied_volatility(self, option_type: str,  market_price: float, iterations: int = 100, tolerance: float = 1e-5) -> tuple:
         """
@@ -64,7 +74,7 @@ class BlackScholes:
         vol = self.v
 
         for _ in range(iterations):
-            vega = self.vega()
+            vega = self.vega(option_type, market_price)
             if vega == 0:
                 break  # Prevent division by zero
 

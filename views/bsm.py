@@ -7,13 +7,16 @@ sys.path.append('views')
 from functions.computations import (
     get_bsm_prices,
     get_leland_prices,
-    get_implied_volatility
+    get_implied_volatility,
+    get_vega,
+    get_gamma
 )
 
 from functions.helper import (
     generate_bsm_option_surface,
     generate_leland_option_surface,
-    generate_bsm_vs_leland_option_surface
+    generate_bsm_vs_leland_option_surface,
+    get_greeks_format
 )
 
 st.set_page_config(
@@ -45,7 +48,7 @@ with st.sidebar:
         q = st.number_input("Expected Dividend Yield %", min_value=0.0, value=0.0, step=0.05, format="%0.2f", key="q")
         st.write("Transaction costs $")
         k = st.number_input("Round trip transaction cost %", min_value=0.0, value=0.0, step=0.05, format="%0.2f", key="k", help="All expenses for buying and selling the option as a percentage")
-        dt = st.number_input("δ Time (trading days)", min_value=0.0, value=0.0, step=1.0, format="%0.2f", key="tc", help="The time between hedging adjustment's (days)")
+        dt = st.number_input("Δ Time (trading days)", min_value=0.0, value=0.0, step=1.0, format="%0.2f", key="tc", help="The time between hedging adjustment's (days)")
 
     #st.divider()
 
@@ -58,7 +61,7 @@ with st.sidebar:
 
 
 # --- TABS ---
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Black-Scholes Model", "Leland's Model","BSM Vs BSML", "Option Surface Picker", "Implied Volatility"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Black-Scholes Model", "Leland's Model","BSM Vs BSML", "Option Surface Picker", "Implied Volatility & Greeks"])
 
 # --- TAB 1: STANDARD BLACK-SCHOLES PLOTS ---
 with tab1:
@@ -168,31 +171,54 @@ with tab4:
 
 # --- TAB 5: IMPLIED VOLATILITY CALCULATION ---
 with tab5:
-    col1, col2 = st.columns([1, 2])
+    col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
-        st.header("Implied Volatility Calculation")
-        st.write("Calculate the implied volatility of an option given its market price.")
+        st.header("Put & Call")
 
         with st.container(border=True):
-            option_type = st.selectbox(
-                "Select Option Type for Implied Volatility Calculation",
-                ["call", "put"],
-                index=0,
-                )
-            
-            # Set default market price based on selected option
-            call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
-            default_market_price = call_price if option_type == 'call' else put_price
-
-            option_type_market_price = st.number_input(
-                    "Market Price of the Option $",
-                    min_value=0.0,
-                    value=default_market_price,
-                    format="%.2f"
-                )
-
-        option_type, implied_vol = get_implied_volatility(T, K, S, v, r, q, option_type, option_type_market_price)
+            st.subheader("Implied Volatility Calculation")
+            st.write("Calculate the Implied Volatility of an option given its market price.")
+            with st.expander("View Variables that impact **Implied Volatility**"):
+                st.markdown(
+                    """
+                    - **$S$**: Current price of the underlying asset
+                    - **$K$**: Strike price of the option
+                    - **$T-t$**: Time to expiration (in years)
+                    - **$r$**: Risk-free interest rate
+                    - **$\\sigma$**: Volatility of the underlying asset's returns
+                    - **$q$**: Dividend yield of the underlying asset
+                    - **$k$**: Transaction costs (For Leland's model)
+                    - **$dt$**: Time delta (For Leland's model)
+                    """
+            )
+            # lets split up greek calculations into their own function
+            get_greeks_format(T, K, S, v, r, q, k, dt, get_implied_volatility, "Implied Volatility")
 
         with st.container(border=True):
-            st.metric(f"Implied Volatility for {option_type.capitalize()} Option", f"{implied_vol:.2%}")
+            st.subheader("Vega Calculation")
+            st.write("Calculate the Vega of an option given its market price.")
+            with st.expander("View Variables that impact **Vega** the most"):
+                st.markdown(
+                    """
+                    - **$T-t$**: Time to expiry is the most important factor for Vega. As time to expiry increases, Vega increases.
+                    - **$K$**: The strike price of the option. Vega is highest when the option is at-the-money.
+                    - **$\\sigma$**: Volatility of the underlying asset's returns. Higher volatility increases Vega.
+                    """
+            )
+
+            get_greeks_format(T, K, S, v, r, q, k, dt, get_vega, "Vega")
+
+        with st.container(border=True):
+            st.subheader("Gamma Calculation")
+            st.write("Calculate the Gamma of an option given its market price.")
+            with st.expander("View Variables that impact **Gamma** the most"):
+                st.markdown(
+                    """
+                    - **$T-t$**: Time to expiry is the most important factor for Gamma. As time to expiry decreases, Gamma increases.
+                    - **$K$**: The strike price of the option. Gamma is highest when the option is at-the-money.
+                    """
+            )
+
+            get_greeks_format(T, K, S, v, r, q, k, dt, get_gamma, "Gamma")
+
