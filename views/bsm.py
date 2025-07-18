@@ -9,7 +9,8 @@ from functions.computations import (
     get_leland_prices,
     get_implied_volatility,
     get_vega,
-    get_gamma
+    get_gamma,
+    get_delta
 )
 
 from functions.helper import (
@@ -171,9 +172,9 @@ with tab4:
 
 # --- TAB 5: IMPLIED VOLATILITY CALCULATION ---
 with tab5:
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1_page, col2_page, col3_page = st.columns([1, 1, 1])
 
-    with col1:
+    with col1_page:
         st.header("Put & Call")
 
         with st.container(border=True):
@@ -193,58 +194,57 @@ with tab5:
                     """
             )
 
-            with st.container(border=True):
             
-                model_type = st.selectbox(
-                    f"Select Model for Implied Volatility Calculation",
-                    ["Black-Scholes", "Leland's Model"],
-                    index=0,
-                    key=f"Implied Volatility_model_type"
+            model_type = st.selectbox(
+                f"Select Model for Implied Volatility Calculation",
+                ["Black-Scholes", "Leland's Model"],
+                index=0,
+                key=f"Implied Volatility_model_type"
+            )
+
+            if model_type == "Leland's Model":
+                if dt <= 0:
+                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.stop()
+                call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
+            else:
+                call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+                
+            option_type = st.selectbox(
+                f"Select Option Type for Implied Volatility Calculation",
+                ["Call", "Put"],
+                index=0,
+                key=f"Implied Volatility_option_type"
+                )
+            
+            
+            option_type_market_price = st.number_input(
+                    "Market Price of the Option $",
+                    min_value=0.0,
+                    value=0.0,
+                    format="%.2f",
+                    step= 0.01,
+                    key=f"Implied Volatility_market_price"
                 )
 
-                if model_type == "Leland's Model":
-                    if dt <= 0:
-                        st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
-                        st.stop()
-                    call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
-                else:
-                    call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
-                    
-                option_type = st.selectbox(
-                    f"Select Option Type for Implied Volatility Calculation",
-                    ["Call", "Put"],
-                    index=0,
-                    key=f"Implied Volatility_option_type"
-                    )
-                
-                
-                option_type_market_price = st.number_input(
-                        "Market Price of the Option $",
-                        min_value=0.0,
-                        value=0.0,
-                        format="%.2f",
-                        step= 0.01,
-                        key=f"Implied Volatility_market_price"
-                    )
-
-                option_type_market_price = float(option_type_market_price) # fix for whole numbers not being handled right
+            option_type_market_price = float(option_type_market_price) # fix for whole numbers not being handled right
 
 
-                if option_type == "Call":
-                    option_price = call_price
-                else:
-                    option_price = put_price
+            if option_type == "Call":
+                option_price = call_price
+            else:
+                option_price = put_price
 
 
-                greek_output = get_implied_volatility(T, K, S, v, r, q, k, dt, option_type, option_type_market_price, model_type)
+            greek_output = get_implied_volatility(T, K, S, v, r, q, k, dt, option_type, option_type_market_price, model_type)
 
 
-                with st.container(border=True):
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.metric(f"{option_type} Option Model Price", f"${option_price:.2f}")
-                    with col2:
-                        st.metric(f"Implied Volatility for {option_type}", f"{greek_output:.2%}")
+            with st.container(border=True):
+                col1_1, col2_1 = st.columns(2)
+                with col1_1:
+                    st.metric(f"{option_type} Option Model Price", f"${option_price:.2f}")
+                with col2_1:
+                    st.metric(f"Implied Volatility for {option_type}", f"{greek_output:.2%}")
 
         with st.container(border=True):
             st.subheader("Vega Calculation")
@@ -258,7 +258,49 @@ with tab5:
                     """
             )
 
-            #get_greeks_format(T, K, S, v, r, q, k, dt, get_vega, "Vega")
+
+            greek_model = "vega"
+        
+            model_type = st.selectbox(
+                f"Select Model for {greek_model} Calculation",
+                ["Black-Scholes", "Leland's Model"],
+                index=0,
+                key=f"{greek_model}_model_type"
+            )
+
+            if model_type == "Leland's Model":
+                if dt <= 0:
+                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.stop()
+                call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
+            else:
+                call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+                
+            option_type = st.selectbox(
+                f"Select Option Type for {greek_model} Calculation",
+                ["Call", "Put"],
+                index=0,
+                key=f"{greek_model}_option_type"
+            )
+
+
+            if option_type == "Call":
+                option_price = call_price
+            else:
+                option_price = put_price
+
+
+            greek_output = get_vega(T, K, S, v, r, q, k, dt, model_type)
+
+            greek_output /= 100 # Vega is often expressed per 1% change in volatility, so we divide by 100
+
+
+            with st.container(border=True):
+                col1_2, col2_2 = st.columns(2)
+                with col1_2:
+                    st.metric(f"{option_type} Option Model Price", f"${option_price:.2f}")
+                with col2_2:
+                    st.metric(f"{greek_model} for {option_type}", f"{greek_output:.2%}")
 
         with st.container(border=True):
             st.subheader("Gamma Calculation")
@@ -271,5 +313,102 @@ with tab5:
                     """
             )
 
-            #get_greeks_format(T, K, S, v, r, q, k, dt, get_gamma, "Gamma")
+            greek_model = "Gamma"
+        
+            model_type = st.selectbox(
+                f"Select Model for {greek_model} Calculation",
+                ["Black-Scholes", "Leland's Model"],
+                index=0,
+                key=f"{greek_model}_model_type"
+            )
+
+            if model_type == "Leland's Model":
+                if dt <= 0:
+                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.stop()
+                call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
+            else:
+                call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+                
+            option_type = st.selectbox(
+                f"Select Option Type for {greek_model} Calculation",
+                ["Call", "Put"],
+                index=0,
+                key=f"{greek_model}_option_type"
+            )
+
+
+            if option_type == "Call":
+                option_price = call_price
+            else:
+                option_price = put_price
+
+
+            greek_output = get_gamma(T, K, S, v, r, q, k, dt, model_type)
+
+            #greek_output /= 100 # Vega is often expressed per 1% change in volatility, so we divide by 100
+
+
+            with st.container(border=True):
+                col1_3, col2_3 = st.columns(2)
+                with col1_3:
+                    st.metric(f"{option_type} Option Model Price", f"${option_price:.2f}")
+                with col2_3:
+                    st.metric(f"{greek_model} for {option_type}", f"{greek_output:.2%}")
+
+    with col2_page:
+        st.header("Call")
+
+        with st.container(border=True):
+            st.subheader("Call Delta Calculation")
+            st.write("Calculate the Delta of an option given its market price.")
+            with st.expander("View Variables that impact **Delta**"):
+                st.markdown(
+                    """
+                    - **$S$**: Current price of the underlying asset
+                    - **$K$**: Strike price of the option
+                    - **$T-t$**: Time to expiration (in years)
+                    - **$r$**: Risk-free interest rate
+                    - **$\\sigma$**: Volatility of the underlying asset's returns
+                    - **$q$**: Dividend yield of the underlying asset
+                    - **$k$**: Transaction costs (For Leland's model)
+                    - **$dt$**: Time delta (For Leland's model)
+                    """
+            )
+
+
+
+            greek_model = "Delta"
+            option_type = "Call"
+        
+            model_type = st.selectbox(
+                f"Select Model for {greek_model} Calculation",
+                ["Black-Scholes", "Leland's Model"],
+                index=0,
+                key=f"{greek_model}_model_type"
+            )
+
+            if model_type == "Leland's Model":
+                if dt <= 0:
+                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.stop()
+                call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
+            else:
+                call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+
+
+            Call_Delta, Put_Delta = get_delta(T, K, S, v, r, q, k, dt, model_type)
+
+
+            with st.container(border=True):
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric(f"{option_type} Option Model Price", f"${call_price:.2f}")
+                with col2:
+                    st.metric(f"{greek_model} for {option_type}", f"{Call_Delta:.3f}")
+
+
+
+    with col3_page:
+        st.header("Put")
 

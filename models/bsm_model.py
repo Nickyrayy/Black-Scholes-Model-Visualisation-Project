@@ -65,12 +65,20 @@ class BlackScholes:
         S, T, q, d1 = self.S, self.T, self.q, self.d1
         Gamma = norm.pdf(d1) * exp(-q * T) / (S * self.v * sqrt(T))
         return Gamma
+    
+    def delta(self):
+        """
+        Compute Delta: sensitivity of option price to the underlying asset price.
+        """
+        Call_Delta = exp(-self.q * self.T) * norm.cdf(self.d1)
+        Put_Delta = exp(-self.q * self.T) * (Call_Delta - 1)
+        return Call_Delta, Put_Delta
 
     def implied_volatility(self, option_type: str,  market_price: float, iterations: int = 100, tolerance: float = 1e-5) -> float:
         """
         Calculate implied volatility using the Newton-Raphson method.
         """
-        #market_price = float(market_price)
+
         vol = self.v
 
         for _ in range(iterations):

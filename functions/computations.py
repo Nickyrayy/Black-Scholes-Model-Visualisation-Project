@@ -33,17 +33,37 @@ def get_implied_volatility(T, K, S, v, r, q, k, dt, option_type, market_price, m
         return bsml_model.implied_volatility(option_type, market_price)
 
 @st.cache_data
-def get_vega(T, K, S, v, r, q, option_type, market_price):
+def get_vega(T, K, S, v, r, q, k, dt, model_type):
     """
     Caches the Vega calculation.
     """
-    bs_model = BlackScholes(T, K, S, v, r, q)
-    return bs_model.vega(option_type, market_price)
+    if model_type == "Black-Scholes":
+        bs_model = BlackScholes(T, K, S, v, r, q)
+        return bs_model.vega()
+    else:
+        bsml_model = BlackScholesLeland(T, K, S, v, r, q, k, dt)
+        return bsml_model.vega()
 
 @st.cache_data
-def get_gamma(T, K, S, v, r, q, option_type, market_price):
+def get_gamma(T, K, S, v, r, q, k, dt, model_type):
     """
     Caches the Gamma calculation.
     """
-    bs_model = BlackScholes(T, K, S, v, r, q)
-    return bs_model.gamma(option_type, market_price)
+    if model_type == "Black-Scholes":
+        bs_model = BlackScholes(T, K, S, v, r, q)
+        return bs_model.gamma()
+    else:
+        bsml_model = BlackScholesLeland(T, K, S, v, r, q, k, dt)
+        return bsml_model.gamma()
+    
+@st.cache_data
+def get_delta(T, K, S, v, r, q, k, dt, model_type):
+    """
+    Caches the Delta calculation.
+    """
+    if model_type == "Black-Scholes":
+        bs_model = BlackScholes(T, K, S, v, r, q)
+        return bs_model.delta()
+    else:
+        bsml_model = BlackScholesLeland(T, K, S, v, r, q, k, dt)
+        return bsml_model.delta()
