@@ -16,7 +16,7 @@ from functions.helper import (
     generate_bsm_option_surface,
     generate_leland_option_surface,
     generate_bsm_vs_leland_option_surface,
-    get_greeks_format
+    #get_greeks_format
 )
 
 st.set_page_config(
@@ -192,8 +192,59 @@ with tab5:
                     - **$dt$**: Time delta (For Leland's model)
                     """
             )
-            # lets split up greek calculations into their own function
-            get_greeks_format(T, K, S, v, r, q, k, dt, get_implied_volatility, "Implied Volatility")
+
+            with st.container(border=True):
+            
+                model_type = st.selectbox(
+                    f"Select Model for Implied Volatility Calculation",
+                    ["Black-Scholes", "Leland's Model"],
+                    index=0,
+                    key=f"Implied Volatility_model_type"
+                )
+
+                if model_type == "Leland's Model":
+                    if dt <= 0:
+                        st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                        st.stop()
+                    call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
+                else:
+                    call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+                    
+                option_type = st.selectbox(
+                    f"Select Option Type for Implied Volatility Calculation",
+                    ["Call", "Put"],
+                    index=0,
+                    key=f"Implied Volatility_option_type"
+                    )
+                
+                
+                option_type_market_price = st.number_input(
+                        "Market Price of the Option $",
+                        min_value=0.0,
+                        value=0.0,
+                        format="%.2f",
+                        step= 0.01,
+                        key=f"Implied Volatility_market_price"
+                    )
+
+                option_type_market_price = float(option_type_market_price) # fix for whole numbers not being handled right
+
+
+                if option_type == "Call":
+                    option_price = call_price
+                else:
+                    option_price = put_price
+
+
+                greek_output = get_implied_volatility(T, K, S, v, r, q, k, dt, option_type, option_type_market_price, model_type)
+
+
+                with st.container(border=True):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.metric(f"{option_type} Option Model Price", f"${option_price:.2f}")
+                    with col2:
+                        st.metric(f"Implied Volatility for {option_type}", f"{greek_output:.2%}")
 
         with st.container(border=True):
             st.subheader("Vega Calculation")
@@ -207,7 +258,7 @@ with tab5:
                     """
             )
 
-            get_greeks_format(T, K, S, v, r, q, k, dt, get_vega, "Vega")
+            #get_greeks_format(T, K, S, v, r, q, k, dt, get_vega, "Vega")
 
         with st.container(border=True):
             st.subheader("Gamma Calculation")
@@ -220,5 +271,5 @@ with tab5:
                     """
             )
 
-            get_greeks_format(T, K, S, v, r, q, k, dt, get_gamma, "Gamma")
+            #get_greeks_format(T, K, S, v, r, q, k, dt, get_gamma, "Gamma")
 

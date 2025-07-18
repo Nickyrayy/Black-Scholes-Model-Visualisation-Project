@@ -112,7 +112,7 @@ def get_image_as_base64(path):
     with open(path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
     
-def get_greeks_format(T, K, S, v, r, q, k, dt, greek_model, greek_name):
+"""def get_greeks_format(greek_value, greek_name):
     with st.container(border=True):
             
         model_type = st.selectbox(
@@ -162,3 +162,4 @@ def get_greeks_format(T, K, S, v, r, q, k, dt, greek_model, greek_name):
                 st.metric(f"{option_type} Option Model Price", f"${option_price:.2f}")
             with col2:
                 st.metric(f"{greek_name} for {option_type} Option", f"{greek_output:.2%}")
+                """

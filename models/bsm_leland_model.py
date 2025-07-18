@@ -69,39 +69,63 @@ class BlackScholesLeland:
 
         return call_price, put_price
     
-    def vega(self, option_type, market_price):
+    def vega(self):
         """
-        Compute Vega: sensitivity of option price to volatility.
+        Compute Vega for the Leland model using the chain rule.
         """
-        S, T, q, d1 = self.S, self.T, self.q, self.d1
-        Vega = S * exp(-q * T) * norm.pdf(d1) * sqrt(T)
-        Vega /= 100 # Vega is often expressed per 1% change in volatility
-        return option_type, Vega
-    
-    def implied_volatility(self, option_type: str,  market_price: float, iterations: int = 100, tolerance: float = 1e-5) -> tuple:
+        v = self.v
+        if v <= 0:
+            return 0.0
+
+        # 1. Calculate the adjusted volatility and the Leland Number
+        leland_number = sqrt(2 / pi) * (self.k / (v * sqrt(self.dt)))
+        v_adj = sqrt(v**2 * (1 + leland_number))
+
+        if v_adj <= 0:
+            return 0.0
+
+        # 2. Calculate the derivative of the adjustment: d(v_adj) / d(v)
+        dv_adj_dv = (v * (1 + 0.5 * leland_number)) / v_adj
+
+        # 3. Calculate BSM Vega using the ADJUSTED volatility
+        # We need a temporary BSM model to get the d1 for the adjusted vol
+        temp_bs_model = BlackScholes(self.T, self.K, self.S, v_adj * 100, self.r, self.q)
+        bsm_vega_adj = temp_bs_model.vega() # This is dC/dv_adj
+        vega = bsm_vega_adj * dv_adj_dv
+
+        # 4. Apply the chain rule
+        return vega
+
+    def implied_volatility(self, option_type: str,  market_price: float, iterations: int = 100, tolerance: float = 1e-5) -> float:
         """
-        Calculate implied volatility using the Newton-Raphson method.
+        Calculate implied volatility using the Newton-Raphson method for Leland's model.
         """
-        vol = self.compute_leland_number()
+        # Start with an initial guess for the INPUT volatility
+        input_vol = self.v
 
         for _ in range(iterations):
-            vega = self.vega(option_type, market_price)
-            if vega == 0:
-                break  # Prevent division by zero
+            # 1. Update the instance's input volatility with our current guess
+            self.v = input_vol
 
-            vol = self.compute_leland_number()
-            self._compute_d_values()  # Recalculate d1 and d2 with the new volatility
+            # 2. Calculate the price and the CORRECT vega based on this guess
             call, put = self.calculate_prices()
-            option = call if option_type.lower() == 'call' else put
-            diff = option - market_price
+            vega = self.vega()
 
-            
+            if vega == 0:
+                break 
+
+            # 3. Find the difference from the market price
+            option_price = call if option_type.lower() == 'call' else put
+            diff = option_price - market_price
+
+            # 4. Check for convergence
             if abs(diff) < tolerance:
-                return option_type, vol
-            vol -= (diff) / vega
+                return self.v
 
-        return float('nan'), float('nan')  # Return NaN if no convergence
+            # 5. Update the guess for the INPUT volatility
+            input_vol -= diff / vega
 
+        return float('nan')
 
 
         

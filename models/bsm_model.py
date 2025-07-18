@@ -50,43 +50,45 @@ class BlackScholes:
 
         return call, put
 
-    def vega(self, option_type, market_price):
+    def vega(self):
         """
         Compute Vega: sensitivity of option price to volatility.
         """
         S, T, q, d1 = self.S, self.T, self.q, self.d1
         Vega = S * exp(-q * T) * norm.pdf(d1) * sqrt(T)
-        Vega /= 100 # Vega is often expressed per 1% change in volatility
-        return option_type, Vega
+        return Vega
     
-    def gamma(self, option_type, market_price):
+    def gamma(self):
         """
         Compute Gamma: sensitivity of Vega to volatility.
         """
         S, T, q, d1 = self.S, self.T, self.q, self.d1
         Gamma = norm.pdf(d1) * exp(-q * T) / (S * self.v * sqrt(T))
-        return option_type, Gamma
-    
-    def implied_volatility(self, option_type: str,  market_price: float, iterations: int = 100, tolerance: float = 1e-5) -> tuple:
+        return Gamma
+
+    def implied_volatility(self, option_type: str,  market_price: float, iterations: int = 100, tolerance: float = 1e-5) -> float:
         """
         Calculate implied volatility using the Newton-Raphson method.
         """
+        #market_price = float(market_price)
         vol = self.v
 
         for _ in range(iterations):
-            vega = self.vega(option_type, market_price)
-            if vega == 0:
-                break  # Prevent division by zero
-
             self.v = vol
             self._compute_d_values()  # Recalculate d1 and d2 with the new volatility
             call, put = self.calculate_prices()
+
+            vega = self.vega()
+            if vega == 0:
+                break  # Prevent division by zero
+
+            
             option = call if option_type.lower() == 'call' else put
             diff = option - market_price
 
             
             if abs(diff) < tolerance:
-                return option_type, vol
+                return vol
             vol -= (diff) / vega
 
-        return float('nan'), float('nan')  # Return NaN if no convergence
+        return float('nan')  # Return NaN if no convergence

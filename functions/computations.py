@@ -20,11 +20,11 @@ def get_leland_prices(T, K, S, v, r, q, k, dt):
     return bsml_model.calculate_prices()
 
 @st.cache_data
-def get_implied_volatility(T, K, S, v, r, q, k, dt, option_type, market_price):
+def get_implied_volatility(T, K, S, v, r, q, k, dt, option_type, market_price, model_type):
     """
     Caches the implied volatility calculation.
     """
-    if dt <= 0:
+    if model_type == "Black-Scholes":
         bs_model = BlackScholes(T, K, S, v, r, q)
         return bs_model.implied_volatility(option_type, market_price)
     
