@@ -8,9 +8,11 @@ from functions.computations import (
     get_bsm_prices,
     get_leland_prices,
     get_implied_volatility,
+    get_theta,
     get_vega,
     get_gamma,
-    get_delta
+    get_delta,
+    get_rho
 )
 
 from functions.helper import (
@@ -244,7 +246,7 @@ with tab5:
                 with col1_1:
                     st.metric(f"{option_type} Option Model Price", f"${option_price:.2f}")
                 with col2_1:
-                    st.metric(f"Implied Volatility for {option_type}", f"{greek_output:.2%}")
+                    st.metric(f"Implied Volatility for {option_type}", f"{greek_output:.3f}")
 
         with st.container(border=True):
             st.subheader("Vega Calculation")
@@ -300,7 +302,7 @@ with tab5:
                 with col1_2:
                     st.metric(f"{option_type} Option Model Price", f"${option_price:.2f}")
                 with col2_2:
-                    st.metric(f"{greek_model} for {option_type}", f"{greek_output:.2%}")
+                    st.metric(f"{greek_model} for {option_type}", f"{greek_output:.3f}")
 
         with st.container(border=True):
             st.subheader("Gamma Calculation")
@@ -354,7 +356,7 @@ with tab5:
                 with col1_3:
                     st.metric(f"{option_type} Option Model Price", f"${option_price:.2f}")
                 with col2_3:
-                    st.metric(f"{greek_model} for {option_type}", f"{greek_output:.2%}")
+                    st.metric(f"{greek_model} for {option_type}", f"{greek_output:.3f}")
 
     with col2_page:
         st.header("Call")
@@ -365,18 +367,14 @@ with tab5:
             with st.expander("View Variables that impact **Delta**"):
                 st.markdown(
                     """
-                    - **$S$**: Current price of the underlying asset
-                    - **$K$**: Strike price of the option
+                    - **$$$**: Money-ness of the option.
+                        - **In-the-money**: Strike price below the current stock price.
+                        - **At-the-money**: Strike price equal to the current stock price.
+                        - **Out-of-the-money**: Strike price above the current stock price.
                     - **$T-t$**: Time to expiration (in years)
-                    - **$r$**: Risk-free interest rate
                     - **$\\sigma$**: Volatility of the underlying asset's returns
-                    - **$q$**: Dividend yield of the underlying asset
-                    - **$k$**: Transaction costs (For Leland's model)
-                    - **$dt$**: Time delta (For Leland's model)
                     """
             )
-
-
 
             greek_model = "Delta"
             option_type = "Call"
@@ -385,7 +383,7 @@ with tab5:
                 f"Select Model for {greek_model} Calculation",
                 ["Black-Scholes", "Leland's Model"],
                 index=0,
-                key=f"{greek_model}_model_type"
+                key=f"{greek_model}_call"
             )
 
             if model_type == "Leland's Model":
@@ -407,8 +405,231 @@ with tab5:
                 with col2:
                     st.metric(f"{greek_model} for {option_type}", f"{Call_Delta:.3f}")
 
+        with st.container(border=True):
+            st.subheader("Call Theta Calculation")
+            st.write("Calculate the Theta of a call option given its market price.")
+            with st.expander("View Variables that impact **Theta**"):
+                st.markdown(
+                    """
+                    - **$T-t$**: Time to expiration (in years)
+                    - **$K$**: Strike price of the option
+                    - **$\\sigma$**: Volatility of the underlying asset's returns
+                    - **$r$**: Risk-free interest rate
+                    - **$q$**: Dividend yield of the underlying asset
+                    - **$k$**: Transaction costs (For Leland's model)
+                    - **$dt$**: Time delta (For Leland's model)
+                    """
+                )
 
+            greek_model = "Theta"
+            option_type = "Call"
+        
+            model_type = st.selectbox(
+                f"Select Model for {greek_model} Calculation",
+                ["Black-Scholes", "Leland's Model"],
+                index=0,
+                key=f"{greek_model}_call_theta"
+            )
 
+            if model_type == "Leland's Model":
+                if dt <= 0:
+                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.stop()
+                call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
+            else:
+                call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+
+            theta_call, theta_put = get_theta(T, K, S, v, r, q, k, dt, model_type)
+
+            theta_call /= 365
+
+            with st.container(border=True):
+                col1_2, col2_2 = st.columns(2)
+                with col1_2:
+                    st.metric(f"{option_type} Option Model Price", f"${call_price:.2f}")
+                with col2_2:
+                    st.metric(f"{greek_model} for {option_type}", f"{theta_call:.3f}")
+        
+        with st.container(border=True):
+            st.subheader("Call Rho Calculation")
+            st.write("Calculate the Rho of a call option given its market price.")
+            with st.expander("View Variables that impact **Rho**"):
+                st.markdown(
+                    """
+                    - **$T-t$**: Time to expiration (in years)
+                    - **$K$**: Strike price of the option
+                    - **$\\sigma$**: Volatility of the underlying asset's returns
+                    - **$r$**: Risk-free interest rate
+                    - **$q$**: Dividend yield of the underlying asset
+                    - **$k$**: Transaction costs (For Leland's model)
+                    - **$dt$**: Time delta (For Leland's model)
+                    """
+                )
+
+            greek_model = "Rho"
+            option_type = "Call"
+        
+            model_type = st.selectbox(
+                f"Select Model for {greek_model} Calculation",
+                ["Black-Scholes", "Leland's Model"],
+                index=0,
+                key=f"{greek_model}_call_rho"
+            )
+
+            if model_type == "Leland's Model":
+                if dt <= 0:
+                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.stop()
+                call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
+            else:
+                call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+
+            rho_call, rho_put = get_rho(T, K, S, v, r, q, k, dt, model_type)
+
+            rho_call /= 100
+
+            with st.container(border=True):
+                col1_2, col2_2 = st.columns(2)
+                with col1_2:
+                    st.metric(f"{option_type} Option Model Price", f"${call_price:.2f}")
+                with col2_2:
+                    st.metric(f"{greek_model} for {option_type}", f"{rho_call:.3f}")
+                    
     with col3_page:
         st.header("Put")
 
+        with st.container(border=True):
+            st.subheader("Put Delta Calculation")
+            st.write("Calculate the Delta of a put option given its market price.")
+            with st.expander("View Variables that impact **Delta**"):
+                st.markdown(
+                    """
+                    - **$$$**: Money-ness of the option.
+                        - **In-the-money**: Strike price above the current stock price.
+                        - **At-the-money**: Strike price equal to the current stock price.
+                        - **Out-of-the-money**: Strike price below the current stock price.
+                    - **$T-t$**: Time to expiration (in years)
+                    - **$\\sigma$**: Volatility of the underlying asset's returns
+                    """
+            )
+
+            greek_model = "Delta"
+            option_type = "Put"
+        
+            model_type = st.selectbox(
+                f"Select Model for {greek_model} Calculation",
+                ["Black-Scholes", "Leland's Model"],
+                index=0,
+                key=f"{greek_model}_put"
+            )
+
+            if model_type == "Leland's Model":
+                if dt <= 0:
+                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.stop()
+                call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
+            else:
+                call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+
+
+            Call_Delta, Put_Delta = get_delta(T, K, S, v, r, q, k, dt, model_type)
+
+
+            with st.container(border=True):
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric(f"{option_type} Option Model Price", f"${put_price:.2f}")
+                with col2:
+                    st.metric(f"{greek_model} for {option_type}", f"{Put_Delta:.3f}")
+        
+        with st.container(border=True):
+            st.subheader("Put Theta Calculation")
+            st.write("Calculate the Theta of a put option given its market price.")
+            with st.expander("View Variables that impact **Theta**"):
+                st.markdown(
+                    """
+                    - **$T-t$**: Time to expiration (in years)
+                    - **$K$**: Strike price of the option
+                    - **$\\sigma$**: Volatility of the underlying asset's returns
+                    - **$r$**: Risk-free interest rate
+                    - **$q$**: Dividend yield of the underlying asset
+                    - **$k$**: Transaction costs (For Leland's model)
+                    - **$dt$**: Time delta (For Leland's model)
+                    """
+                )
+
+            greek_model = "Theta"
+            option_type = "Put"
+        
+            model_type = st.selectbox(
+                f"Select Model for {greek_model} Calculation",
+                ["Black-Scholes", "Leland's Model"],
+                index=0,
+                key=f"{greek_model}_put_theta"
+            )
+
+            if model_type == "Leland's Model":
+                if dt <= 0:
+                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.stop()
+                call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
+            else:
+                call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+
+            theta_call, theta_put = get_theta(T, K, S, v, r, q, k, dt, model_type)
+
+            theta_put /= 365
+
+            with st.container(border=True):
+                col1_2, col2_2 = st.columns(2)
+                with col1_2:
+                    st.metric(f"{option_type} Option Model Price", f"${put_price:.2f}")
+                with col2_2:
+                    st.metric(f"{greek_model} for {option_type}", f"{theta_put:.3f}")
+                    
+        with st.container(border=True):
+            st.subheader("Put Rho Calculation")
+            st.write("Calculate the Rho of a put option given its market price.")
+            with st.expander("View Variables that impact **Rho**"):
+                st.markdown(
+                    """
+                    - **$T-t$**: Time to expiration (in years)
+                    - **$K$**: Strike price of the option
+                    - **$\\sigma$**: Volatility of the underlying asset's returns
+                    - **$r$**: Risk-free interest rate
+                    - **$q$**: Dividend yield of the underlying asset
+                    - **$k$**: Transaction costs (For Leland's model)
+                    - **$dt$**: Time delta (For Leland's model)
+                    """
+                )
+
+            greek_model = "Rho"
+            option_type = "Put"
+        
+            model_type = st.selectbox(
+                f"Select Model for {greek_model} Calculation",
+                ["Black-Scholes", "Leland's Model"],
+                index=0,
+                key=f"{greek_model}_put_rho"
+            )
+
+            if model_type == "Leland's Model":
+                if dt <= 0:
+                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.stop()
+                call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
+            else:
+                call_price, put_price = get_bsm_prices(T, K, S, v, r, q)
+
+            rho_call, rho_put = get_rho(T, K, S, v, r, q, k, dt, model_type)
+
+            rho_put /= 100
+            
+            with st.container(border=True):
+                col1_2, col2_2 = st.columns(2)
+                with col1_2:
+                    st.metric(f"{option_type} Option Model Price", f"${put_price:.2f}")
+                with col2_2:
+                    st.metric(f"{greek_model} for {option_type}", f"{rho_put:.3f}")
+
+# fix leland for both Delta's, and Put Theta and Rho

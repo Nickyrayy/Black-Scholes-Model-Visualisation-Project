@@ -73,6 +73,28 @@ class BlackScholes:
         Call_Delta = exp(-self.q * self.T) * norm.cdf(self.d1)
         Put_Delta = exp(-self.q * self.T) * (Call_Delta - 1)
         return Call_Delta, Put_Delta
+    
+    def theta(self):
+        """
+        Compute Theta: sensitivity of option price to time decay.
+        """
+        S, K, T, r, q, d1, d2 = self.S, self.K, self.T, self.r, self.q, self.d1, self.d2
+        theta_call = (-S * exp(-q * T) * norm.pdf(d1) * self.v / (2 * sqrt(T)) -
+                      r * K * exp(-r * T) * norm.cdf(d2) +
+                      q * S * exp(-q * T) * norm.cdf(d1))
+        theta_put = (-S * exp(-q * T) * norm.pdf(d1) * self.v / (2 * sqrt(T)) +
+                     r * K * exp(-r * T) * norm.cdf(-d2) -
+                     q * S * exp(-q * T) * norm.cdf(-d1))
+        return theta_call, theta_put
+    
+    def rho(self):
+        """
+        Compute Rho: sensitivity of option price to interest rate changes.
+        """
+        K, T, r, d2 = self.K, self.T, self.r, self.d2
+        rho_call = K * T * exp(-r * T) * norm.cdf(d2)
+        rho_put = -K * T * exp(-r * T) * norm.cdf(-d2)
+        return rho_call, rho_put
 
     def implied_volatility(self, option_type: str,  market_price: float, iterations: int = 100, tolerance: float = 1e-5) -> float:
         """

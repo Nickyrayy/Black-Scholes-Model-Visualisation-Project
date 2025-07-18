@@ -67,3 +67,27 @@ def get_delta(T, K, S, v, r, q, k, dt, model_type):
     else:
         bsml_model = BlackScholesLeland(T, K, S, v, r, q, k, dt)
         return bsml_model.delta()
+    
+@st.cache_data
+def get_theta(T, K, S, v, r, q, k, dt, model_type):
+    """
+    Caches the Theta calculation.
+    """
+    if model_type == "Black-Scholes":
+        bs_model = BlackScholes(T, K, S, v, r, q)
+        return bs_model.theta()
+    else:
+        bsml_model = BlackScholesLeland(T, K, S, v, r, q, k, dt)
+        return bsml_model.theta()
+    
+@st.cache_data
+def get_rho(T, K, S, v, r, q, k, dt, model_type):
+    """
+    Caches the Rho calculation.
+    """
+    if model_type == "Black-Scholes":
+        bs_model = BlackScholes(T, K, S, v, r, q)
+        return bs_model.rho()
+    else:
+        bsml_model = BlackScholesLeland(T, K, S, v, r, q, k, dt)
+        return bsml_model.rho()
