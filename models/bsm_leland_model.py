@@ -21,8 +21,8 @@ class BlackScholesLeland:
         self.K = K
         self.S = S
         self.v = v / 100
-        self.r = r
-        self.q = q
+        self.r = r / 100
+        self.q = q / 100
         self.k = k / 100
         self.dt = dt / 252
 
@@ -36,14 +36,18 @@ class BlackScholesLeland:
         """
         Compute d1 and d2 values used in pricing formulas.
         """
-        if self.v <= 0:
-            self.d1 = float('nan')
-            self.d2 = float('nan')
+        new_v = self.compute_leland_number()
+
+        if new_v <= 0:
+            d1 = float('nan')
+            d2 = float('nan')
         else:
-            vol_sqrt_T = self.v * sqrt(self.T)
-            numerator = log(self.S / self.K) + self.T * (self.r - self.q + 0.5 * self.v**2)
-            self.d1 = numerator / vol_sqrt_T
-            self.d2 = self.d1 - vol_sqrt_T
+            vol_sqrt_T = new_v * sqrt(self.T)
+            numerator = log(self.S / self.K) + self.T * (self.r - self.q + 0.5 * new_v**2)
+            d1 = numerator / vol_sqrt_T
+            d2 = d1 - vol_sqrt_T
+
+        return d1, d2
 
     def compute_leland_number(self):
         v, k, dt = self.v, self.k, self.dt
@@ -64,7 +68,7 @@ class BlackScholesLeland:
 
         new_v = self.compute_leland_number()
 
-        bs_model = BlackScholes(T, K, S, new_v * 100, r , q) # convert back to percentages
+        bs_model = BlackScholes(T, K, S, new_v * 100, r * 100, q * 100) # convert back to percentages
         call_price, put_price = bs_model.calculate_prices()
 
         return call_price, put_price
@@ -89,7 +93,7 @@ class BlackScholesLeland:
 
         # 3. Calculate BSM Vega using the ADJUSTED volatility
         # We need a temporary BSM model to get the d1 for the adjusted vol
-        temp_bs_model = BlackScholes(self.T, self.K, self.S, v_adj * 100, self.r, self.q)
+        temp_bs_model = BlackScholes(self.T, self.K, self.S, v_adj * 100, self.r * 100, self.q * 100)
         bsm_vega_adj = temp_bs_model.vega() # This is dC/dv_adj
         vega = bsm_vega_adj * dv_adj_dv
 
@@ -100,27 +104,32 @@ class BlackScholesLeland:
         """
         Compute Gamma: sensitivity of Vega to volatility.
         """
-        S, T, q, d1 = self.S, self.T, self.q, self.d1
-        Gamma = norm.pdf(d1) * exp(-q * T) / (S * self.v * sqrt(T))
+        new_v = self.compute_leland_number()
+        d1, _ = self._compute_d_values()
+        S, T, q = self.S, self.T, self.q
+        Gamma = norm.pdf(d1) * exp(-q * T) / (S * new_v * sqrt(T))
         return Gamma
     
     def delta(self):
         """
         Compute Delta: sensitivity of option price to the underlying asset price.
         """
-        Call_Delta = norm.cdf(self.d1)
-        Put_Delta = Call_Delta - 1
+        d1, _ = self._compute_d_values()
+        Call_Delta = exp(-self.q * self.T) * norm.cdf(d1)
+        Put_Delta = Call_Delta - exp(-self.q * self.T)
         return Call_Delta, Put_Delta
     
     def theta(self):
         """
         Compute Theta: sensitivity of option price to time decay.
         """
-        S, K, T, r, q, d1, d2 = self.S, self.K, self.T, self.r, self.q, self.d1, self.d2
-        theta_call = (-S * exp(-q * T) * norm.pdf(d1) * self.v / (2 * sqrt(T)) -
+        d1, d2 = self._compute_d_values()
+        new_v = self.compute_leland_number()
+        S, K, T, r, q = self.S, self.K, self.T, self.r, self.q
+        theta_call = (-S * exp(-q * T) * norm.pdf(d1) * new_v / (2 * sqrt(T)) -
                       r * K * exp(-r * T) * norm.cdf(d2) +
                       q * S * exp(-q * T) * norm.cdf(d1))
-        theta_put = (-S * exp(-q * T) * norm.pdf(d1) * self.v / (2 * sqrt(T)) +
+        theta_put = (-S * exp(-q * T) * norm.pdf(d1) * new_v / (2 * sqrt(T)) +
                      r * K * exp(-r * T) * norm.cdf(-d2) -
                      q * S * exp(-q * T) * norm.cdf(-d1))
         return theta_call, theta_put
@@ -129,7 +138,8 @@ class BlackScholesLeland:
         """
         Compute Rho: sensitivity of option price to interest rate changes.
         """
-        K, T, r, d2 = self.K, self.T, self.r, self.d2
+        _, d2 = self._compute_d_values()
+        K, T, r = self.K, self.T, self.r
         rho_call = K * T * exp(-r * T) * norm.cdf(d2)
         rho_put = -K * T * exp(-r * T) * norm.cdf(-d2)
         return rho_call, rho_put
