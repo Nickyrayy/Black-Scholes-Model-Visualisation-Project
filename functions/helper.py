@@ -1,15 +1,14 @@
 import streamlit as st
-from functions.graph_surface_helper import generate_bsm_surface, generate_leland_surface, generate_bsm_vs_leland_surface
 import base64
 import os
 
-from functions.computations import (
-    get_bsm_prices,
-    get_leland_prices,
+from functions.graph_surface_helper import (
+    generate_bsm_surface, 
+    generate_leland_surface, 
+    generate_bsm_vs_leland_surface
 )
 
-
-def display_option_surface(title, surface_func, base_args, key_suffix, default_rotation, elevation=None, rotation=None):
+def display_option_surface(title, surface_func, base_args, key_suffix, default_rotation, elevation=None, rotation=None) -> None:
     """
     A reusable function to display an option surface plot and its controls.
     This function is a general-purpose plotter.
@@ -18,100 +17,100 @@ def display_option_surface(title, surface_func, base_args, key_suffix, default_r
         st.subheader(title)
         plot_placeholder = st.empty()
 
-        # If elevation and rotation are not passed directly, create sliders for them.
+        # if elevation and rotation are not passed directly, create sliders for them
         if elevation is None and rotation is None:
             with st.expander("Adjust Plot View"):
                 elevation = st.slider('Elevation', 0, 90, 20, 5, key=f"e_{key_suffix}")
                 rotation = st.slider('Rotation', 0, 360, value=default_rotation, step=5, key=f"r_{key_suffix}")
 
-        # Construct the full list of arguments for the plotting function
-        # The order is based on the computation function signature: (type, elevation, rotation, ...)
+        # construct the full list of arguments for the plotting function
+        # note: the order is based on the computation function signature: (type, elevation, rotation, ...)
         all_args = (base_args[0], elevation, rotation) + base_args[1:]
         
-        # Generate the plot figure
+        # generate the plot figure
         fig = surface_func(*all_args)
         plot_placeholder.pyplot(fig)
 
-def generate_bsm_option_surface(option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, elevation=None, rotation=None):
+def generate_bsm_option_surface(option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, elevation=None, rotation=None) -> None:
     """
     Generates and displays a Black-Scholes option surface.
     This function is specific to the Black-Scholes model.
     """
-    # Prepare arguments for the BSM computation function
+    # prepare arguments for the BSM computation function
     bsm_args = (option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
-    
-    # Set a default viewing angle based on the option type
+
+    # set a default viewing angle based on the option type
     default_rotation = 330 if option_type == "Call" else 230
     
     display_option_surface(
         title=f"{option_type} Option Surface",
         surface_func=generate_bsm_surface,
         base_args=bsm_args,
-        key_suffix=f"bsm_{option_type.lower()}",
+        key_suffix=f"bsm_{option_type}",
         default_rotation=default_rotation,
         elevation=elevation,
         rotation=rotation
     )
 
-def generate_leland_option_surface(option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt, elevation=None, rotation=None):
+def generate_leland_option_surface(option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt, elevation=None, rotation=None) -> None:
     """
     Generates and displays a Leland's Model option surface.
     This function is specific to Leland's model.
     """
-    # Leland's model requires time delta (dt) to be greater than zero.
+    # leland's model requires time delta (dt) to be greater than zero
     if not dt > 0:
         st.info(f"To plot the {option_type} surface, please set a Δ Time greater than zero in the sidebar.")
         return
 
-    # Prepare arguments for the Leland computation function
+    # prepare arguments for the Leland computation function
     leland_args = (option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
     
-    # Set a default viewing angle based on the option type
+    # set a default viewing angle based on the option type
     default_rotation = 330 if "Call" in option_type else 230
 
     display_option_surface(
         title=f"{option_type} Surface",
         surface_func=generate_leland_surface,
         base_args=leland_args,
-        key_suffix=f"leland_{option_type.replace(' ', '_').lower()}",
+        key_suffix=f"leland_{option_type}",
         default_rotation=default_rotation,
         elevation=elevation,
         rotation=rotation
     )
 
-def generate_bsm_vs_leland_option_surface(option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt, elevation=None, rotation=None):
+def generate_bsm_vs_leland_option_surface(option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt, elevation=None, rotation=None) -> None:
     """
     Generates and displays a comparison surface between Black-Scholes and Leland's model.
     This function is specific to the BSM vs BSML comparison.
     """
-    # Leland's model requires time delta (dt) to be greater than zero.
+    # leland's model requires time delta (dt) to be greater than zero
     if not dt > 0:
         st.warning(f"To plot the {option_type} surface, please set a Δ Time greater than zero in the sidebar.")
         return
 
-    # Prepare arguments for the Leland computation function
+    # prepare arguments for the Leland computation function
     leland_args = (option_type, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
     
-    # Set a default viewing angle based on the option type
+    # set a default viewing angle based on the option type
     default_rotation = 330 if "Call" in option_type else 230
 
     display_option_surface(
         title=f"Bsm vs Leland {option_type} Surface",
         surface_func=generate_bsm_vs_leland_surface,
         base_args=leland_args,
-        key_suffix=f"bsmVsleland_{option_type.replace(' ', '_').lower()}",
+        key_suffix=f"bsmVsleland_{option_type}",
         default_rotation=default_rotation,
         elevation=elevation,
         rotation=rotation
     )
 
-def get_image_as_base64(path):
+def get_image_as_base64(path) -> str | None:
     """Encodes a local image file into a base64 string for embedding in HTML."""
     if not os.path.exists(path):
         return None
     with open(path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
-    
+
 """def get_greeks_format(greek_value, greek_name):
     with st.container(border=True):
             

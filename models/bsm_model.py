@@ -5,7 +5,6 @@ from scipy.stats import norm
 class BlackScholes:
     def __init__(self, T: float, K: float, S: float, v: float, r: float, q: float):
         """
-        Parameters:
         - T: Time to maturity (in years)
         - K: Strike price
         - S: Spot price
@@ -22,7 +21,7 @@ class BlackScholes:
 
         self._compute_d_values()
 
-    def _compute_d_values(self):
+    def _compute_d_values(self) -> None:
         """
         Compute d1 and d2 values used in pricing formulas.
         """
@@ -35,7 +34,7 @@ class BlackScholes:
             self.d1 = numerator / vol_sqrt_T
             self.d2 = self.d1 - vol_sqrt_T
 
-    def calculate_prices(self):
+    def calculate_prices(self) -> tuple:
         """
         Calculate and return Black-Scholes call and put prices.
         """
@@ -50,7 +49,7 @@ class BlackScholes:
 
         return call, put
 
-    def vega(self):
+    def vega(self) -> float:
         """
         Compute Vega: sensitivity of option price to volatility.
         """
@@ -58,23 +57,23 @@ class BlackScholes:
         Vega = S * exp(-q * T) * norm.pdf(d1) * sqrt(T)
         return Vega
     
-    def gamma(self):
+    def gamma(self) -> float:
         """
-        Compute Gamma: sensitivity of Vega to volatility.
+        Compute Gamma: sensitivity of delta in relation to changes in the underlying asset price.
         """
         S, T, q, d1 = self.S, self.T, self.q, self.d1
         Gamma = norm.pdf(d1) * exp(-q * T) / (S * self.v * sqrt(T))
         return Gamma
-    
-    def delta(self):
+
+    def delta(self) -> tuple:
         """
         Compute Delta: sensitivity of option price to the underlying asset price.
         """
         Call_Delta = exp(-self.q * self.T) * norm.cdf(self.d1)
         Put_Delta = exp(-self.q * self.T) * (Call_Delta - 1)
         return Call_Delta, Put_Delta
-    
-    def theta(self):
+
+    def theta(self) -> tuple:
         """
         Compute Theta: sensitivity of option price to time decay.
         """
@@ -86,8 +85,8 @@ class BlackScholes:
                      r * K * exp(-r * T) * norm.cdf(-d2) -
                      q * S * exp(-q * T) * norm.cdf(-d1))
         return theta_call, theta_put
-    
-    def rho(self):
+
+    def rho(self) -> tuple:
         """
         Compute Rho: sensitivity of option price to interest rate changes.
         """
@@ -100,25 +99,27 @@ class BlackScholes:
         """
         Calculate implied volatility using the Newton-Raphson method.
         """
-
         vol = self.v
 
         for _ in range(iterations):
             self.v = vol
-            self._compute_d_values()  # Recalculate d1 and d2 with the new volatility
+            # recalculate d1 and d2 with the new volatility
+            self._compute_d_values()
             call, put = self.calculate_prices()
 
             vega = self.vega()
             if vega == 0:
-                break  # Prevent division by zero
+                # prevent division by zero
+                break
 
             
             option = call if option_type.lower() == 'call' else put
             diff = option - market_price
 
-            
+            # check for convergence
             if abs(diff) < tolerance:
                 return vol
             vol -= (diff) / vega
 
-        return float('nan')  # Return NaN if no convergence
+        # return NaN if no convergence
+        return float('nan')

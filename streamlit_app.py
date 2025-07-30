@@ -7,13 +7,13 @@ about_page = st.Page(
     page="./views/about_me.py",
     title="About Me",
     icon=":material/person:",
-    default=True,
 )
 
 bsm_page = st.Page(
     page="./views/bsm.py",
     title="Black-Scholes Model ",
     icon=":material/functions:",
+    default=True
 )
 
 bsm_info = st.Page(
@@ -28,7 +28,7 @@ pg = st.navigation(
         "Models":[bsm_page],
     }
 )
-
+# doesnt show for some reason
 st.logo("assets/black-scholes-model-high-resolution-logo.png")
 
 pg.run()

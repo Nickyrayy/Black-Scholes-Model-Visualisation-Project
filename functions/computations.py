@@ -4,7 +4,7 @@ from models.bsm_model import BlackScholes
 from models.bsm_leland_model import BlackScholesLeland
 
 @st.cache_data
-def get_bsm_prices(T, K, S, v, r, q):
+def get_bsm_prices(T, K, S, v, r, q) -> tuple:
     """
     Caches the Black-Scholes price calculation.
     """
@@ -12,7 +12,7 @@ def get_bsm_prices(T, K, S, v, r, q):
     return bs_model.calculate_prices()
 
 @st.cache_data
-def get_leland_prices(T, K, S, v, r, q, k, dt):
+def get_leland_prices(T, K, S, v, r, q, k, dt) -> tuple:
     """
     Caches the Leland price calculation.
     """
@@ -20,7 +20,7 @@ def get_leland_prices(T, K, S, v, r, q, k, dt):
     return bsml_model.calculate_prices()
 
 @st.cache_data
-def get_implied_volatility(T, K, S, v, r, q, k, dt, option_type, market_price, model_type):
+def get_implied_volatility(T, K, S, v, r, q, k, dt, option_type, market_price, model_type) -> float:
     """
     Caches the implied volatility calculation.
     """
@@ -33,7 +33,7 @@ def get_implied_volatility(T, K, S, v, r, q, k, dt, option_type, market_price, m
         return bsml_model.implied_volatility(option_type, market_price)
 
 @st.cache_data
-def get_vega(T, K, S, v, r, q, k, dt, model_type):
+def get_vega(T, K, S, v, r, q, k, dt, model_type) -> float:
     """
     Caches the Vega calculation.
     """
@@ -45,7 +45,7 @@ def get_vega(T, K, S, v, r, q, k, dt, model_type):
         return bsml_model.vega()
 
 @st.cache_data
-def get_gamma(T, K, S, v, r, q, k, dt, model_type):
+def get_gamma(T, K, S, v, r, q, k, dt, model_type) -> float:
     """
     Caches the Gamma calculation.
     """
@@ -57,7 +57,7 @@ def get_gamma(T, K, S, v, r, q, k, dt, model_type):
         return bsml_model.gamma()
     
 @st.cache_data
-def get_delta(T, K, S, v, r, q, k, dt, model_type):
+def get_delta(T, K, S, v, r, q, k, dt, model_type) -> tuple:
     """
     Caches the Delta calculation.
     """
@@ -69,7 +69,7 @@ def get_delta(T, K, S, v, r, q, k, dt, model_type):
         return bsml_model.delta()
     
 @st.cache_data
-def get_theta(T, K, S, v, r, q, k, dt, model_type):
+def get_theta(T, K, S, v, r, q, k, dt, model_type) -> tuple:
     """
     Caches the Theta calculation.
     """
@@ -81,7 +81,7 @@ def get_theta(T, K, S, v, r, q, k, dt, model_type):
         return bsml_model.theta()
     
 @st.cache_data
-def get_rho(T, K, S, v, r, q, k, dt, model_type):
+def get_rho(T, K, S, v, r, q, k, dt, model_type) -> tuple:
     """
     Caches the Rho calculation.
     """

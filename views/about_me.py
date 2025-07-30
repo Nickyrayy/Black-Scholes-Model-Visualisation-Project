@@ -10,26 +10,25 @@ st.set_page_config(
 )
 
 # --- Profile Section ---
-col1, col2 = st.columns([0.3, 0.7], gap="large")
+col1, col2 = st.columns([0.3, 0.7], gap="small")
 with col1:
     try:
-        profile_pic = Image.open('assets/profile_pic.png')
-        st.image(profile_pic, width=230)
+        profile_pic = Image.open('assets/profile-pic-v2.png')
+        st.image(profile_pic, width=350)
     except FileNotFoundError:
-        st.info("Add a profile picture to 'assets/profile_pic.png' to display an image here.")
+        st.info("Add a profile picture to assets to display an image here.")
 
 
 with col2:
     st.title("Nicholas Richter")
     st.subheader("Computer Science & Mathematics Student | Monash University")
-    st.write(
+    st.warning(
         """
         I am a driven and analytical student pursuing a double degree in Computer Science and Mathematics, with a major in Data Science. My work focuses on the intersection of complex financial models, high-performance computing, and intuitive software design. This portfolio showcases my ability to transform theoretical concepts into practical, hands-on applications.
         """
     )
     social_col1, social_col2, social_col_rest = st.columns([1, 1, 20])
 
-    # Get base64 encoded strings for logos
     linkedin_logo_b64 = get_image_as_base64('assets/linkedin.png')
     github_logo_b64 = get_image_as_base64('assets/github.png')
 
@@ -40,8 +39,8 @@ with col2:
                 unsafe_allow_html=True
             )
         else:
-            # Fallback to text link if image is not found
-            st.markdown("[🔗 LinkedIn](https://www.linkedin.com/in/nick-r-richter/)")
+            # fallback to text link if image is not found
+            st.markdown("[LinkedIn](https://www.linkedin.com/in/nick-r-richter/)")
 
     with social_col2:
         if github_logo_b64:
@@ -50,15 +49,15 @@ with col2:
                 unsafe_allow_html=True
             )
         else:
-            st.markdown("[🐙 GitHub](https://github.com/Nickyrayy)")
+            st.markdown("[GitHub](https://github.com/Nickyrayy)")
 
 st.markdown("---")
 
-# --- Project Emphasis Section ---
+# --- BSM Project ---
 st.header("Featured Project: Black-Scholes Options Pricing Visualisation Tool")
-st.markdown(
+st.info(
     """
-    This interactive dashboard was developed to calculate and visualize the theoretical price of European call and put options. The primary goal was to create an educational tool that clearly demonstrates the impact of market variables on option pricing, including the nuanced effect of transaction costs.
+    This interactive dashboard was developed to calculate and visualize the theoretical price of European call and put options. The primary goal was to create an educational tool that clearly demonstrates the impact of market variables on option pricing, including the effect of transaction costs and the effects various variables have on the option's greeks.
     """
 )
 
@@ -71,6 +70,8 @@ with col1:
             """
             - **Black-Scholes Model**: Calculated the theoretical price for European call and put options.
             - **Leland's Transaction Cost Model**: Implemented Hayne E. Leland's variation on the volatility calculation to incorporate transaction costs.
+            - **Greeks Calculation**: Computed the Greeks (Delta, Gamma, Vega, Theta, Rho) to assess risk and sensitivity of option prices to various factors.
+            - **Implied Volatility**: Calculated implied volatility using the Newton-Raphson method.
             """
         )
 
@@ -133,6 +134,7 @@ with col1:
             - SQL
             """
         )
+
 with col2:
     with st.container(border=True):
         st.subheader("Tools & Technologies")

@@ -14,7 +14,7 @@ def generate_bsm_surface(option_type, elevation, rotation, strike_min, strike_ma
     return fig
 
 @st.cache_data
-def generate_leland_surface(option_type, elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt):
+def generate_leland_surface(option_type, elevation, rotation, strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt) :
     """
     Caches the Leland surface plot generation.
     """
