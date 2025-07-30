@@ -802,10 +802,3 @@ with tab6:
                 with col2_2:
                     st.metric(f"{greek_model} for {option_type}", f"{rho_put:.3f}")
 
-
-
-# add option premium using time to expiry: Done
-# create simple greeks visualisation: Done
-# finish about me page + bsm info page: Done
-# clean up code and add comments: Done
-# add profile picture: 

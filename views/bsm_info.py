@@ -1,14 +1,33 @@
 import streamlit as st
+from functions.helper import get_image_as_base64
 
 # --- Page Configuration ---
 st.set_page_config(
     page_title="About the Models",
-    page_icon="🧠",
+    page_icon=":material/book_ribbon:",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-col1, col2, col3 = st.columns([1,3,1])
+investopedia_logo_b64 = get_image_as_base64('assets/investopedia_logo.png')
+wikipedia_logo_b64 = get_image_as_base64('assets/wikipedia_logo.png')
+
+with st.sidebar:
+    st.title("Want to learn more?")
+
+    st.write("Investopedia:")
+    st.markdown(f"<a href='https://www.investopedia.com/terms/b/blackscholes.asp' target='_blank'><img src='data:image/png;base64,{investopedia_logo_b64}' width='32'></a>", unsafe_allow_html=True)
+    
+    st.write("Wikipedia:")
+    st.markdown(f"<a href='https://en.wikipedia.org/wiki/Black%E2%80%93Scholes_model' target='_blank'><img src='data:image/png;base64,{wikipedia_logo_b64}' width='32'></a>", unsafe_allow_html=True)
+
+    st.write("Original Paper:")
+    st.markdown("[Black-Scholes Paper](https://www.jstor.org/stable/1831029)")
+
+    st.write("Leland's Model Paper:")
+    st.markdown("[Leland's Model Paper](https://www.jstor.org/stable/2328113)")
+
+col1, col2, col3 = st.columns([1,5,1])
 with col2:
     st.title("Option Pricing Models: A Brief Technical Overview")
     st.info("""

@@ -5,10 +5,29 @@ from functions.helper import get_image_as_base64
 # --- Page Configuration ---
 st.set_page_config(
     page_title="About Nicholas Richter",
-    page_icon="�",
+    page_icon=":material/person:",
     layout="wide"
 )
 
+linkedin_logo_b64 = get_image_as_base64('assets/linkedin.png')
+github_logo_b64 = get_image_as_base64('assets/github.png')
+
+with st.sidebar:
+    st.title("Contacts:")
+
+    st.subheader("Email:")
+    st.write("Nicholas.Richter.Work@gmail.com")
+    st.subheader("Mobile:")
+    st.write("+61 432 454 526")
+
+    st.subheader("Socials:")
+    col1, col2, col3 = st.columns([1,1,4])
+    with col1:
+        st.markdown(f"<a href='https://www.linkedin.com/in/nick-r-richter/' target='_blank'><img src='data:image/png;base64,{linkedin_logo_b64}' width='32'></a>", unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"<a href='https://github.com/Nickyrayy' target='_blank'><img src='data:image/png;base64,{github_logo_b64}' width='32'></a>", unsafe_allow_html=True)
+
+    st.divider()
 # --- Profile Section ---
 col1, col2 = st.columns([0.3, 0.7], gap="small")
 with col1:
@@ -29,9 +48,6 @@ with col2:
     )
     social_col1, social_col2, social_col_rest = st.columns([1, 1, 20])
 
-    linkedin_logo_b64 = get_image_as_base64('assets/linkedin.png')
-    github_logo_b64 = get_image_as_base64('assets/github.png')
-
     with social_col1:
         if linkedin_logo_b64:
             st.markdown(
@@ -51,7 +67,7 @@ with col2:
         else:
             st.markdown("[GitHub](https://github.com/Nickyrayy)")
 
-st.markdown("---")
+st.divider()
 
 # --- BSM Project ---
 st.header("Featured Project: Black-Scholes Options Pricing Visualisation Tool")
@@ -86,7 +102,7 @@ with col2:
             """
         )
 
-st.markdown("---")
+st.divider()
 
 # --- Other Projects Section ---
 st.header("Additional Projects")
@@ -117,7 +133,7 @@ with st.expander("☁️ Cloud-Hosted Secure VPN"):
         **Technologies:** Linux, Oracle Cloud (OCI), OpenVPN.
         """
     )
-st.markdown("---")
+st.divider()
 
 # --- Skills Section ---
 st.header("Technical Skills")

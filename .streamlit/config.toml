@@ -2,8 +2,29 @@
 showErrorDetails = "none"
 
 [theme]
-primaryColor = "#377970ff"
-backgroundColor = "#262730"
-secondaryBackgroundColor = "#3b3b3bff"
+
+# The preset Streamlit theme that your custom theme inherits from.
+#
+# This can be one of the following: "light" or "dark".
+base = "light"
+
+# Primary accent color.
+primaryColor = "#0b105c77"
+
+# Background color of the app.
+backgroundColor = "#97bbccff"
+
+# Background color used for most interactive widgets.
+secondaryBackgroundColor = "#1a276ea8"
+
+# Color used for almost all text.
 textColor = "#ffffffff"
-font = "sans serif"
+
+
+# The font family for all text, except code blocks.
+#
+# This can be one of the following:
+# - "sans-serif"
+# - "serif"
+# - "monospace"
+font = "serif"

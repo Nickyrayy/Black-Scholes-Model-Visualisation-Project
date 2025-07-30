@@ -1,6 +1,5 @@
 import streamlit as st
 
-
 # Page Setup
 
 about_page = st.Page(
@@ -19,7 +18,7 @@ bsm_page = st.Page(
 bsm_info = st.Page(
     page="./views/bsm_info.py",
     title="Black-Scholes Model Information",
-    icon=":material/functions:"
+    icon=":material/book_ribbon:"
 )
 
 pg = st.navigation(
@@ -28,7 +27,5 @@ pg = st.navigation(
         "Models":[bsm_page],
     }
 )
-# doesnt show for some reason
-st.logo("assets/black-scholes-model-high-resolution-logo.png")
 
 pg.run()
