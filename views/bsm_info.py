@@ -12,6 +12,16 @@ st.set_page_config(
 investopedia_logo_b64 = get_image_as_base64('assets/investopedia_logo.png')
 wikipedia_logo_b64 = get_image_as_base64('assets/wikipedia_logo.png')
 
+# --- Sidebar Styling ---
+st.markdown("""
+    <style>
+        [data-testid="stSidebar"] {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+
 with st.sidebar:
     st.title("Want to learn more?")
 
@@ -30,7 +40,7 @@ with st.sidebar:
 col1, col2, col3 = st.columns([1,5,1])
 with col2:
     st.title("Option Pricing Models: A Brief Technical Overview")
-    st.info("""
+    st.warning("""
         This page provides an overview of the **financial models** used in this application for option pricing.
         Understanding these models, their assumptions, and their differences is key to interpreting the results.
     """)
@@ -74,7 +84,7 @@ with col2:
             P(S, t) = K e^{-r(T-t)} N(-d_2) - S N(-d_1)
             ''')
 
-        with st.expander("View the Black-Scholes Formulas"):
+        with st.expander("View the Black-Scholes Formulas", expanded=True):
 
             st.markdown("Where:")
             st.latex(r'''
@@ -104,7 +114,7 @@ with col2:
             Hayne Leland's 1985 model addresses this by providing a practical solution. Instead of fundamentally altering the BSM equation, Leland showed that the effect of transaction costs could be approximated by adjusting a single, critical input: **volatility**. The logic is that transaction costs add to the risk of hedging, and this increased risk is analogous to an increase in the asset's volatility. By 'inflating' the volatility, the model charges a higher premium for the option to cover anticipated transaction costs.
         """)
 
-        with st.expander("See How the Leland Model Works"):
+        with st.expander("See How the Leland Model Works", expanded=True):
             st.markdown("""
             The application of the model is a two-step process: first, calculate an adjusted volatility that accounts for transaction costs, and second, use this adjusted volatility in the standard Black-Scholes formula.
             """)
@@ -148,4 +158,4 @@ with col2:
             - **No Unique Price:** Because the adjusted volatility depends on the chosen rebalancing frequency ($\\Delta t$), there is no single "correct" price, but rather a price that is consistent with a specific hedging strategy.
             """)
 
-    st.info("In conclusion, the Leland model provides a practical method for incorporating transaction costs into option pricing. By adjusting volatility, it offers a more conservative and realistic valuation, acknowledging that maintaining a hedge is not a cost-free exercise.")
+    st.warning("In conclusion, the Leland model provides a practical method for incorporating transaction costs into option pricing. By adjusting volatility, it offers a more conservative and realistic valuation, acknowledging that maintaining a hedge is not a cost-free exercise.")

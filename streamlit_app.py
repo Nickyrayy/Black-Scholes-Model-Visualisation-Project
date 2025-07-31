@@ -4,7 +4,7 @@ import streamlit as st
 
 about_page = st.Page(
     page="./views/about_me.py",
-    title="About Me",
+    title="About Me & Project Outline",
     icon=":material/person:",
 )
 
@@ -23,7 +23,7 @@ bsm_info = st.Page(
 
 pg = st.navigation(
     {
-        "info":[about_page,bsm_info],
+        "Info":[about_page,bsm_info],
         "Models":[bsm_page],
     }
 )

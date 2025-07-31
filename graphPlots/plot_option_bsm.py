@@ -49,24 +49,29 @@ class PlotOptionBSM:
             raise ValueError(f"Unknown option_type for BSM plot: {option_type}")
 
         # --- Create the figure ---
-        fig = plt.figure(figsize=(8, 8), facecolor="#FFFFFF", edgecolor="#262730")
+        fig = plt.figure(figsize=(8, 8), facecolor="#6b0000ff", edgecolor="#6b0000ff")
         ax = fig.add_subplot(111, projection='3d')
         ax.view_init(elev=elevation, azim=rotation)# type: ignore
         ax.plot_surface(K_grid, T_grid, option_data, cmap='viridis')# type: ignore
 
         # --- Styling ---
         # labels + titles
-        ax.set_xlabel('Strike Price', labelpad=10, color="#FFFFFF")
-        ax.set_ylabel('Time to Maturity', labelpad=10, color="#FFFFFF")
-        ax.set_zlabel(z_label, labelpad=10, color="#FFFFFF")# type: ignore
-        
-        # graph colouring
-        ax.tick_params(colors="#FFFFFF")
-        ax.xaxis._axinfo["grid"]['color'] = "#FFFFFF"# type: ignore
-        ax.yaxis._axinfo["grid"]['color'] = "#FFFFFF"# type: ignore
-        ax.zaxis._axinfo["grid"]['color'] = "#FFFFFF"# type: ignore
-        ax.set_facecolor("#262730")
-        fig.patch.set_facecolor("#262730")
+        ax.set_xlabel('Strike Price', labelpad=10, color="#6b0000ff")
+        ax.set_ylabel('Time to Maturity', labelpad=10, color="#6b0000ff")
+        ax.set_zlabel(z_label, labelpad=10, color="#6b0000ff")# type: ignore
+
+        # ticks
+        ax.tick_params(colors="#6b0000ff")
+
+        # grid lines
+        ax.xaxis._axinfo["grid"]['color'] = "#6b0000ff"# type: ignore
+        ax.yaxis._axinfo["grid"]['color'] = "#6b0000ff"# type: ignore
+        ax.zaxis._axinfo["grid"]['color'] = "#6b0000ff"# type: ignore
+
+        # background
+        ax.set_facecolor("#fff7e6ff")
+        # border
+        fig.patch.set_facecolor("#fff7e6ff")
 
         # aspect ratio
         ax.set_box_aspect(None, zoom=0.85) # type: ignore

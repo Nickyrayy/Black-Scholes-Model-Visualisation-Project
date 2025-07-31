@@ -59,7 +59,7 @@ def generate_leland_option_surface(option_type, strike_min, strike_max, maturity
     """
     # leland's model requires time delta (dt) to be greater than zero
     if not dt > 0:
-        st.info(f"To plot the {option_type} surface, please set a Δ Time greater than zero in the sidebar.")
+        st.warning(f"To plot the {option_type} surface, please set a Δ Time greater than zero in the sidebar.")
         return
 
     # prepare arguments for the Leland computation function

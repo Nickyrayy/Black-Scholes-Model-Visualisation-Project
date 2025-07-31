@@ -9,16 +9,16 @@ showErrorDetails = "none"
 base = "light"
 
 # Primary accent color.
-primaryColor = "#0b105c77"
+primaryColor = "#6b0000ff"
 
 # Background color of the app.
-backgroundColor = "#97bbccff"
+backgroundColor = "#fff7e6ff"
 
 # Background color used for most interactive widgets.
-secondaryBackgroundColor = "#1a276ea8"
+secondaryBackgroundColor = "#f08649ff"
 
 # Color used for almost all text.
-textColor = "#ffffffff"
+textColor = "#6b0000ff"
 
 
 # The font family for all text, except code blocks.

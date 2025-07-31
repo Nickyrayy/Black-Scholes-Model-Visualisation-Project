@@ -26,6 +26,16 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- Sidebar Styling ---
+st.markdown("""
+    <style>
+        [data-testid="stSidebar"] {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+
 # --- SIDEBAR INPUTS ---
 with st.sidebar:
     st.title("Model Parameters")
@@ -55,7 +65,6 @@ with st.sidebar:
         maturity_min = st.slider('Min Time to Maturity', min_value=0.1, max_value=2.0, value=0.1, step=0.1, key="maturity_min")
         maturity_max = st.slider('Max Time to Maturity', min_value=0.1, max_value=2.0, value=2.0, step=0.1, key="maturity_max")
 
-
 # --- TABS ---
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Black-Scholes Model", "Leland's Model","BSM Vs BSML", "Option Surface Picker", "Implied Volatility & Greeks", "Implied Volatility & Greeks Picker"])
 
@@ -69,22 +78,18 @@ with tab1:
     col1, col2 = st.columns(2)
     with col1:
         st.header("Call Option Value")
-        col1_1, col1_2, col1_3 = st.columns(3)
+        col1_1, col1_2 = st.columns(2)
         with col1_1:
-            st.metric("Price", f"${call_price:.2f}")
-        with col1_2:
             st.metric("Value at Expiry", f"${call_price_on_expiry:.2f}")
-        with col1_3:
+        with col1_2:
             st.metric("Current Premium", f"${call_price - call_price_on_expiry:.2f}")
         generate_bsm_option_surface("Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
     with col2:
         st.header("Put Option Value")
-        col2_1, col2_2, col2_3 = st.columns(3)
+        col2_1, col2_2 = st.columns(2)
         with col2_1:
-            st.metric("Price", f"${put_price:.2f}")
-        with col2_2:
             st.metric("Value at Expiry", f"${put_price_on_expiry:.2f}")
-        with col2_3:
+        with col2_2:
             st.metric("Current Premium", f"${put_price - put_price_on_expiry:.2f}")
         generate_bsm_option_surface("Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q)
 
@@ -98,28 +103,24 @@ with tab2:
         col1, col2 = st.columns(2)
         with col1:
             st.header("Call Option Value")
-            col1_1, col1_2, col1_3 = st.columns(3)
+            col1_1, col1_2 = st.columns(2)
             with col1_1:
-                st.metric("Price", f"${l_call_price:.2f}")
-            with col1_2:
                 st.metric("Value at Expiry", f"${call_price_on_expiry:.2f}")
-            with col1_3:
+            with col1_2:
                 st.metric("Current Premium", f"${l_call_price - call_price_on_expiry:.2f}")
             generate_leland_option_surface("Call", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
 
         with col2:
             st.header("Put Option Value")
-            col2_1, col2_2, col2_3 = st.columns(3)
+            col2_1, col2_2 = st.columns(2)
             with col2_1:
-                st.metric("Price", f"${l_put_price:.2f}")
-            with col2_2:
                 st.metric("Value at Expiry", f"${put_price_on_expiry:.2f}")
-            with col2_3:
+            with col2_2:
                 st.metric("Current Premium", f"${l_put_price - put_price_on_expiry:.2f}")
             generate_leland_option_surface("Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
 
     else:
-        st.info("Enter a Δ Time (in the sidebar) greater than zero to display Leland's Model results.")
+        st.warning("Enter a Δ Time (in the sidebar) greater than zero to display Leland's Model results.")
 
 # --- Tab 3: BSM vs Leland's Model Option Surface ---
 with tab3:
@@ -143,43 +144,35 @@ with tab3:
         with col1:
             st.subheader("Black-Scholes")
 
-            col1_bsm_c, col2_bsm_c, col3_bsm_c = st.columns(3)
+            col1_bsm_c, col2_bsm_c = st.columns(2)
             with col1_bsm_c:
-                st.metric("Price", f"${call_price:.2f}")
-            with col2_bsm_c:
                 st.metric("Value at Expiry", f"${call_price_on_expiry:.2f}")
-            with col3_bsm_c:
+            with col2_bsm_c:
                 st.metric("Current Premium", f"${call_price - call_price_on_expiry:.2f}")
 
         with col2:
             st.subheader("Leland's")
 
-            col1_le_c, col2_le_c, col3_le_c = st.columns(3)
+            col1_le_c, col2_le_c = st.columns(2)
             with col1_le_c:
-                st.metric("Price", f"${l_call_price:.2f}")
-            with col2_le_c:
                 st.metric("Value at Expiry", f"${call_price_on_expiry:.2f}")
-            with col3_le_c:
-                    st.metric("Current Premium", f"${l_call_price - call_price_on_expiry:.2f}")
+            with col2_le_c:
+                st.metric("Current Premium", f"${l_call_price - call_price_on_expiry:.2f}")
 
         with col3:
             st.subheader("Black-Scholes")
-            col1_bsm_p, col2_bsm_p, col3_bsm_p = st.columns(3)
+            col1_bsm_p, col2_bsm_p = st.columns(2)
             with col1_bsm_p:
-                st.metric("Price", f"${put_price:.2f}")
-            with col2_bsm_p:
                 st.metric("Value at Expiry", f"${put_price_on_expiry:.2f}")
-            with col3_bsm_p:
+            with col2_bsm_p:
                 st.metric("Current Premium", f"${put_price - put_price_on_expiry:.2f}")
         
         with col4:
             st.subheader("Leland's")
-            col1_le_p, col2_le_p, col3_le_p = st.columns(3)
+            col1_le_p, col2_le_p = st.columns(2)
             with col1_le_p:
-                st.metric("Price", f"${l_put_price:.2f}")
-            with col2_le_p:
                 st.metric("Value at Expiry", f"${put_price_on_expiry:.2f}")
-            with col3_le_p:
+            with col2_le_p:
                 st.metric("Current Premium", f"${l_put_price - put_price_on_expiry:.2f}")
 
         col1_g, col2_g = st.columns(2)
@@ -190,7 +183,7 @@ with tab3:
         with col2_g:
             generate_bsm_vs_leland_option_surface("Put", strike_min, strike_max, maturity_min, maturity_max, S, v, r, q, k, dt)
     else:
-        st.info("Enter a Δ Time (in the sidebar) greater than zero to display Leland's Model results.")
+        st.warning("Enter a Δ Time (in the sidebar) greater than zero to display Leland's Model results.")
 
 # --- TAB 4: OPTION SURFACE PICKER ---
 with tab4:
@@ -284,7 +277,7 @@ with tab5:
 
                 if model_type == "Leland's Model":
                     if dt <= 0:
-                        st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                        st.warning("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
                         st.stop()
                     call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
                 else:
@@ -394,7 +387,7 @@ with tab6:
 
             if model_type == "Leland's Model":
                 if dt <= 0:
-                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.warning("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
                     st.stop()
                 call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
             else:
@@ -455,7 +448,7 @@ with tab6:
 
             if model_type == "Leland's Model":
                 if dt <= 0:
-                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.warning("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
                     st.stop()
                 call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
             else:
@@ -505,7 +498,7 @@ with tab6:
 
             if model_type == "Leland's Model":
                 if dt <= 0:
-                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.warning("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
                     st.stop()
                 call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
             else:
@@ -562,7 +555,7 @@ with tab6:
 
             if model_type == "Leland's Model":
                 if dt <= 0:
-                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.warning("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
                     st.stop()
                 call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
             else:
@@ -605,7 +598,7 @@ with tab6:
 
             if model_type == "Leland's Model":
                 if dt <= 0:
-                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.warning("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
                     st.stop()
                 call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
             else:
@@ -650,7 +643,7 @@ with tab6:
 
             if model_type == "Leland's Model":
                 if dt <= 0:
-                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.warning("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
                     st.stop()
                 call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
             else:
@@ -697,7 +690,7 @@ with tab6:
 
             if model_type == "Leland's Model":
                 if dt <= 0:
-                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.warning("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
                     st.stop()
                 call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
             else:
@@ -740,7 +733,7 @@ with tab6:
 
             if model_type == "Leland's Model":
                 if dt <= 0:
-                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.warning("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
                     st.stop()
                 call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
             else:
@@ -785,7 +778,7 @@ with tab6:
 
             if model_type == "Leland's Model":
                 if dt <= 0:
-                    st.info("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
+                    st.warning("Please enter a Δ Time (in the sidebar) greater than zero to use Leland's Model.")
                     st.stop()
                 call_price, put_price = get_leland_prices(T, K, S, v, r, q, k, dt)
             else:
