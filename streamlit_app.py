@@ -6,13 +6,13 @@ about_page = st.Page(
     page="./views/about_me.py",
     title="About Me & Project Outline",
     icon=":material/person:",
+    default=True
 )
 
 bsm_page = st.Page(
     page="./views/bsm.py",
     title="Black-Scholes Model ",
-    icon=":material/functions:",
-    default=True
+    icon=":material/functions:"
 )
 
 bsm_info = st.Page(

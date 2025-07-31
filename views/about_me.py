@@ -94,8 +94,8 @@ with col1:
         st.subheader("Financial Models Implemented")
         st.warning(
             """
-            - **Black-Scholes Model**: Calculated the theoretical price for European call and put options.
-            - **Leland's Transaction Cost Model**: Implemented Hayne E. Leland's variation on the volatility calculation to incorporate transaction costs.
+            - **Black-Scholes**: Calculated the theoretical price for European call and put options.
+            - **Leland's**: Implemented Hayne E. Leland's variation on the volatility calculation to incorporate transaction costs.
             - **Greeks Calculation**: Computed the Greeks (Delta, Gamma, Vega, Theta, Rho) to assess sensitivity of option prices to various factors.
             - **Implied Volatility**: Calculated implied volatility using the Newton-Raphson method.
             """
