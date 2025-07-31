@@ -111,7 +111,6 @@ with col2:
             - **Matplotlib**: Used for plotting the option pricing graphs and visualizing the effects of different parameters.
             - **NumPy**: Used for efficient numerical computation of the models.
             - **SciPy**: Employed for advanced mathematical functions.
-            - **Pillow**: Utilized for image processing and rendering.
             """
         )
 
