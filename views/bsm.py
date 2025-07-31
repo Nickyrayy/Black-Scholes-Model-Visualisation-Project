@@ -403,7 +403,7 @@ with tab6:
             option_type_market_price = st.number_input(
                     "Market Price of the Option $",
                     min_value=0.0,
-                    value=float(call_price_on_expiry if option_type == "Call" else put_price_on_expiry),
+                    value=float(call_price_on_expiry * 1.5 if option_type == "Call" else put_price_on_expiry * 1.5),
                     format="%.2f",
                     step= 0.01,
                     key=f"Implied Volatility_market_price"
