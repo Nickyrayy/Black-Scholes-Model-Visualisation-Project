@@ -1,4 +1,4 @@
-# 📈 Black-Scholes Model Visualisation Project
+# Black-Scholes Model Visualisation Project
 
 This project is a option pricing model visualisation tool implemented in Python.
 
